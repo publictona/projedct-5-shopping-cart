@@ -2,6 +2,7 @@ const userModel = require('../models/userModel')
 const aws = require("../aws/aws.js")
 const bcrypt = require("bcrypt")
 const validator = require("../validator/validator.js")
+const jwt = require("jsonwebtoken")
 
 
 
@@ -100,7 +101,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Enter Valid Pincode for Shipping Address" })
         }
 
-        // Billing Address Validation :-
+        //Billing Address Validation :-
         if (!validator.isValid(address.billing)) {
             return res.status(400).send({ status: false, msg: "Billing Address is Required" })
         }
@@ -131,4 +132,53 @@ const createUser = async function (req, res) {
     }
 
 }
-module.exports = { createUser }
+
+//====================================< >============================================================
+
+const loginUser = async function (req, res) {
+    try {
+        const data = req.body;
+        const { email, password } = data;
+
+      
+        if (Object.keys(data) == 0) {
+            return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
+        }
+
+        if (!validator.isValid(email)) {
+            return res.status(400).send({ status: false, message: "Email is required." });
+        }
+
+        if (!validator.isValid(password)) {
+            return res.status(400).send({ status: false, message: "Password is required." });
+        }
+
+        const matchUser = await userModel.findOne({ email, password }).select({userId:1});
+        if (!matchUser) {
+            return res.status(404).send({ status: false, message: " Email/Password is Not Matched" });
+        }
+
+        const token = jwt.sign(
+            {
+                userId: matchUser._id.toString(),
+                Project: "Products Management",
+                expiresIn: "1200sec",
+                iat: new Date().getTime() / 1000   //(iat)Issued At- the time at which the JWT was issued.   
+            },
+
+            "Project-05_group-13",
+            
+            {
+                expiresIn: "1200sec",
+            });
+
+        // res.setHeader("x-user-key", token)
+        return res.status(200).send({ status: true, message: "User Logged in successfully", data:{userId: matchUser, token: token}});
+    }
+    catch (error) {
+        res.status(500).send({ status: false, message: error.message });
+    }
+};
+
+
+module.exports = { createUser ,loginUser}
