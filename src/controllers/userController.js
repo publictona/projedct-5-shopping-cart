@@ -71,9 +71,9 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Password Should be minimum 8 characters and maximum 15 characters", });
         }
 
-
-
-
+        // Password Encryption :-
+        let protectedPassword = await bcrypt.hash(password, 10)
+        data.password = protectedPassword
 
         // Address Validation :-
         if (!validator.isValid(address)) {
@@ -138,19 +138,26 @@ const createUser = async function (req, res) {
 const loginUser = async function (req, res) {
     try {
         const data = req.body;
-        const { email, password } = data;
-
-      
         if (Object.keys(data) == 0) {
             return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
         }
-
+        
+        const { email, password } = data;
+        
         if (!validator.isValid(email)) {
             return res.status(400).send({ status: false, message: "Email is required." });
         }
 
+        if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email.trim()))) {
+            return res.status(400).send({ status: false, msg: "Please provide a valid email" })
+        }
+        
         if (!validator.isValid(password)) {
             return res.status(400).send({ status: false, message: "Password is required." });
+        }
+
+        if (!(password.length >= 8 && password.length <= 15)) {
+            return res.status(400).send({ status: false, msg: "Password Should be minimum 8 characters and maximum 15 characters", });
         }
 
         const matchUser = await userModel.findOne({ email, password }).select({userId:1});
@@ -158,21 +165,24 @@ const loginUser = async function (req, res) {
             return res.status(404).send({ status: false, message: " Email/Password is Not Matched" });
         }
 
+        let checkPassword = matchUser.password
+        let checkUser = await bcrypt.compare(password, checkPassword)
+        if (checkUser == false){
+            return res.status(400).send({ status: false, message: "Password is Incorrect" });
+        }
+
         const token = jwt.sign(
             {
                 userId: matchUser._id.toString(),
                 Project: "Products Management",
-                expiresIn: "1200sec",
                 iat: new Date().getTime() / 1000   //(iat)Issued At- the time at which the JWT was issued.   
             },
-
             "Project-05_group-13",
-            
             {
-                expiresIn: "1200sec",
+                expiresIn: "3600sec",
             });
 
-        // res.setHeader("x-user-key", token)
+        res.setHeader("Authorisation", "Bearer")
         return res.status(200).send({ status: true, message: "User Logged in successfully", data:{userId: matchUser, token: token}});
     }
     catch (error) {
