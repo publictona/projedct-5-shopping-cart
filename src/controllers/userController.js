@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken")
 
 
 
+//======================================= < Create User > ===========================================
 
 const createUser = async function (req, res) {
     try {
@@ -14,7 +15,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
         }
 
-        let { fname, lname, profileImage, email, phone, password, address } = data
+        let { fname, lname, email, phone, password, address } = data
 
         // Profile Image Creation :-
         let files = req.files
@@ -133,7 +134,7 @@ const createUser = async function (req, res) {
 
 }
 
-//====================================< >============================================================
+//=========================================< Login User >==========================================
 
 const loginUser = async function (req, res) {
     try {
@@ -141,9 +142,9 @@ const loginUser = async function (req, res) {
         if (Object.keys(data) == 0) {
             return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
         }
-        
+
         const { email, password } = data;
-        
+
         if (!validator.isValid(email)) {
             return res.status(400).send({ status: false, message: "Email is required." });
         }
@@ -151,7 +152,7 @@ const loginUser = async function (req, res) {
         if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email.trim()))) {
             return res.status(400).send({ status: false, msg: "Please provide a valid email" })
         }
-        
+
         if (!validator.isValid(password)) {
             return res.status(400).send({ status: false, message: "Password is required." });
         }
@@ -160,14 +161,14 @@ const loginUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Password Should be minimum 8 characters and maximum 15 characters", });
         }
 
-        const matchUser = await userModel.findOne({ email, password }).select({userId:1});
+        const matchUser = await userModel.findOne({ email })
         if (!matchUser) {
-            return res.status(404).send({ status: false, message: " Email/Password is Not Matched" });
+            return res.status(404).send({ status: false, message: " Email is Not Matched" });
         }
 
         let checkPassword = matchUser.password
         let checkUser = await bcrypt.compare(password, checkPassword)
-        if (checkUser == false){
+        if (checkUser == false) {
             return res.status(400).send({ status: false, message: "Password is Incorrect" });
         }
 
@@ -183,7 +184,7 @@ const loginUser = async function (req, res) {
             });
 
         res.setHeader("Authorisation", "Bearer")
-        return res.status(200).send({ status: true, message: "User Logged in successfully", data:{userId: matchUser, token: token}});
+        return res.status(200).send({ status: true, message: "User Logged in successfully", data: { userId: matchUser._id, token: token } });
     }
     catch (error) {
         res.status(500).send({ status: false, message: error.message });
@@ -191,4 +192,4 @@ const loginUser = async function (req, res) {
 };
 
 
-module.exports = { createUser ,loginUser}
+module.exports = { createUser, loginUser }
