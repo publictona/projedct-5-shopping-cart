@@ -23,7 +23,7 @@ const createProduct = async function (req, res) {
         data.productImage= uploadedFileURL
 
 
-        console.log("Abhishek",title)
+       
         if(!validator.isValid(data.title)){
             return res.status(400).send({status:false,mgs:'Plz,Provide Title'})
         }
@@ -43,9 +43,9 @@ const createProduct = async function (req, res) {
         if(!validator.isValid(data.price)){
             return res.status(400).send({status:false,mgs:'Plz,Provide Price '})
         }
-        // price format validation
+       // price format validation
         // if(data.price){
-        //    let price= /^(\d{1,2})(,\d{2})*(,\d{1,3}){1}(\.\d{1,})?$/.test(data.price)
+        //    let price= /^(?:(?:INR)\.?\s?)(\d+(:?\,\d+)?(\,\d+)?(\.\d{1,4})?)[., ]$/.test(price)
         //    if(!price){
         //        return res.status(400).send({status:false,msg:"Plz, enter valid format of price"})
         //    }
