@@ -3,6 +3,7 @@ const aws = require("../aws/aws.js")
 const bcrypt = require("bcrypt")
 const validator = require("../validator/validator.js")
 const jwt = require("jsonwebtoken")
+const mongoose= require('mongoose')
 
 
 
@@ -193,5 +194,28 @@ const loginUser = async function (req, res) {
     }
 };
 
+const getUser = async function (req, res)  {
+    try {
+        let userId = req.params.userId
 
-module.exports = { createUser, loginUser }
+        if (!validator.isValid(userId)) {
+            return res.status(400).send({ status: false, msg: "userId is required to get User data" })
+        }
+
+        if (!mongoose.isValidObjectId(userId))
+            res.status(400).send({ status: false, msg: "invalid user ObjectId please Enter correct and  retry" })
+
+        let findUser = await userModel.findOne({ _id: userId, isDeleted: false })
+        if (!findUser) {
+            return res.status(404).send({ status: false, message: "User not found" })
+        }
+        res.status(200).send({ status: true, msg: "User profile details", data: findUser })
+
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).send({ status: false, msg: "error", error: err.message })
+
+    }
+}
+module.exports = { createUser, loginUser,getUser }
