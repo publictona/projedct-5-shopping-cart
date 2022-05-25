@@ -40,7 +40,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false.valueOf, msg: "Email is required" })
         }
 
-        if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email.trim()))) {
+        if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))) {
             return res.status(400).send({ status: false, msg: "Please provide a valid email" })
         }
 
@@ -54,7 +54,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Phone Number Is Required" })
         }
 
-        if (!(/^(?:(?:\+|0{0,2})91(\s*|[\-])?|[0]?)?([6789]\d{2}([ -]?)\d{3}([ -]?)\d{4})$/.test(phone.trim()))) {
+        if (!(/^(?:(?:\+|0{0,2})91(\s*|[\-])?|[0]?)?([6789]\d{2}([ -]?)\d{3}([ -]?)\d{4})$/.test(phone))) {
             return res.status(400).send({ status: false, msg: "Please Provide a Valid Phone Number" })
         }
 
@@ -81,6 +81,8 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Address is Required" })
         }
 
+        address = JSON.parse(address)
+
         // Shipping Address Validation :-
         if (!validator.isValid(address.shipping)) {
             return res.status(400).send({ status: false, msg: "Shipping Address is Required" })
@@ -98,7 +100,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Pincode of Shipping Address is Required" })
         }
 
-        if (!(/^[1-9][0-9]{5}$/.test(address.shipping.pincode.trim()))) {
+        if (!(/^[1-9][0-9]{5}$/.test(address.shipping.pincode))) {
             return res.status(400).send({ status: false, msg: "Enter Valid Pincode for Shipping Address" })
         }
 
@@ -119,13 +121,13 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Pincode of Billing Address is Required" })
         }
 
-        if (!(/^[1-9][0-9]{5}$/.test(address.billing.pincode.trim()))) {
+        if (!(/^[1-9][0-9]{5}$/.test(address.billing.pincode))) {
             return res.status(400).send({ status: false, msg: "Enter Valid Pincode for Billing Address" })
         }
 
-
+        data.address = address
         let savedData = await userModel.create(data)
-        res.status(201).send({ status: true, msg: "Success", data: savedData })
+        res.status(201).send({ status: true, msg: "User Successfully Created", data: savedData })
 
 
     } catch (error) {
