@@ -196,8 +196,10 @@ const loginUser = async function (req, res) {
 
 const getUser = async function (req, res)  {
     try {
-        let userId = req.params.userId
+     let userId = req.params.userId
+        //  let data=req.query
 
+        console.log(data.userId)
         if (!validator.isValid(userId)) {
             return res.status(400).send({ status: false, msg: "userId is required to get User data" })
         }
@@ -218,4 +220,5 @@ const getUser = async function (req, res)  {
 
     }
 }
+
 module.exports = { createUser, loginUser,getUser }
