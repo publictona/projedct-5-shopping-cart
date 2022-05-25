@@ -10,7 +10,7 @@ const {userAuth} =require('../middleware/auth')
  router.post('/register',userController.createUser)
  router.post('/login',userController.loginUser)
  router.get('/user/:userId/profile',userAuth,userController.getUser)
- router.put('/user/:userId/profile',userAuth,userController.updateUser)
+ router.put('/user/:userId/profile',userAuth,userController.updateUserDetails)
 
  //@ PRODUCT ROUTE HANDLER
 //router.post('/products',productController.createProduct)
