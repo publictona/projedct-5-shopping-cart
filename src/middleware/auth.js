@@ -1,23 +1,31 @@
-const userModel = require("../models/userModel")
 const jwt = require("jsonwebtoken")
 
 
-const authentication = async function (req, res, next) {
+const userAuth= async function (req, res, next) {
     try {
-        let token = req.headers['authorization']
+        let token = req.header("Authorization", "Bearer")
         if (!token) {
-            return res.status(400).send({ status: false, msg: 'Plz, provide the token' })
+            return res.status(400).send({ status: false, msg: 'Login Is Required' })
         }
-        //let splitToken =token.split(' ')
-        let decodeToken = jwt.verify(token, "Project-05_group-13")
-        if (!decodeToken) {
-            return res.status(400).send({ status: false, msg: 'Plz, provide the token' })
+
+        let decodedToken = jwt.verify(token, "Project-05_group-13")
+        if (!decodedToken) {
+            return res.status(400).send({ status: false, msg: 'Invalid Token' })
         }
-        next()
+
+        req.userId = decodedToken.userId
+
+        next();
     }
     catch (error) {
         res.status(500).send({ status: false, message: error.message });
-
     }
 }
-module.exports={authentication}
+
+
+
+
+
+
+
+module.exports = { userAuth }
