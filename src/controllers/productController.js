@@ -91,27 +91,35 @@ const createProduct = async function (req, res) {
 
 //====================================== < Get Product > ==========================================
 
-const getProducts = async function (req, res) {
+const getProducts =async function (req,res){
     try {
-        let data = req.query
-        let filter = {}
-        filter.isDeleted = false
-
-        const { name, size, priceGreaterThan, priceLessThan, priceSort } = data
-
-        const findName = await productModel.find({ isDeleted: false }).select({ title: 1, _id: 0 })
-        for (let i = 0; i < findName.length; i++) {
-
-
-
-        }
-
-
+     let data =req.params
+     //console.log(data.availableSizes)
+ //Fetching all products
+     if(Object.keys(data).length==0){
+         let allProdtucts =await productModel.find({isDeleted:false}).select({__v:0})
+         if(allProdtucts){
+             return res.status(200).send({status:true,message:'Success',data:allProdtucts})
+         }
+     }
+ //Fetchin products using filters
+ if(data.availableSizes || data.title || data.price){
+ 
+     let filteredProduct=await productModel.find({$and:[data, {isDeleted:false}]})
+     if(filteredProduct.length==0){
+         return res.status(400).send({status:false,message:'No products found'})
+     }
+      res.status(200).send({status:false,message:'Success',data:filteredProduct})
+ }
+ 
+ 
+ 
     } catch (error) {
-        res.status(500).send({ status: false, msg: error.message })
-
+        res.status(500).send({status:false,message:error.message})
     }
-}
+      
+ }
+
 
 //======================================== < Get Product By Params > =================================
 

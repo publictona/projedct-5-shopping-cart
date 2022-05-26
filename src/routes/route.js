@@ -14,8 +14,8 @@ const {userAuth} =require('../middleware/auth')
 
  //@ PRODUCT ROUTE HANDLER
 router.post('/products',productController.createProduct)
+router.get('/products',productController.getProducts)
 router.get('/products/:productId',productController.getProductById)
-
 router.put('/products/:productId',productController.updateProduct)
 router.delete('/products/:productId',productController.deleteproduct)
 
