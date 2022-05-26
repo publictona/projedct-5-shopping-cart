@@ -112,55 +112,35 @@ const getProducts = async function (req, res) {
 
     }
 }
-//==========================================<update productId>===========================================================================
 
-// const updateProduct = async function(req, res){
-// try {
-//     let productId = req.params.productId
-//     let data = req.body
+//======================================== < Get Product By Params > =================================
 
-//     if (productImage) {
-//         if (files && files.length > 0) {
-//             productImage = await uploadFile(files[0]);
-//         }
-//         updateUser["productImage"] = productImage;
-//     }
+const getProductById = async function (req, res) {
+    try {
+        let productId = req.params.productId
 
+        if (!mongoose.isValidObjectId(productId))
+            res.status(400).send({ status: false, msg: "Please enter a valid ProductId" })
 
-//     if (Object.keys(data) == 0) {
-//         return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
-//     }
+        let foundProduct = await productModel.findOne({ _id: productId, isDeleted: false })
+        if (!foundProduct) {
+            return res.status(400).send({ status: false, msg: 'No product found' })
+        }
+        return res.status(200).send({ status: true, msg: 'Sucess', data: foundProduct })
 
-//     if(!mongoose.isValidObjectId(productId)){
-//         return res.status(400).send({status:false ,msg :"productId is invalid to get product data"})
-//     }
-//      let findProduct = await productModel.findOne({_id:productId  ,isDeleted :false})
-//      if(!findProduct){
-//          return res.status(404).send({status:false ,message :"product not Found"})
-//      }
-//      res.status(200).send({status:true ,message:"success" ,data :findProduct})
+    }
+    catch (error) {
+        res.status(500).send({ status: false, message: error.message })
 
-//      let updateData = await productModel.findByIdAndUpdate(productId, updateProduct, { new: true });
-//     //  if(updateData){
-//     //      return res.status(400).send({status:false , msg: "datails required for product updation"})
-//     //  }
-//          res.status(200).send({ status: true, msg: "Product details Updated Successfully", data: updateData })
+    }
+}
 
+//========================================== < Update Product >=======================================
 
-
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).send({status:false ,message: "error.message"})
-
-//     }
-// }
-
-
-//=========================================================================================
 const updateProduct = async function (req, res) {
     try {
 
-        let productId = req.params.userId;
+        let productId = req.params.productId;
         let bodyData = req.body;
 
 
@@ -174,14 +154,10 @@ const updateProduct = async function (req, res) {
         }
 
 
-        if (req.userId != productId) {
-            return res.status(401).send({ status: false, message: "You're not Authorized" })
-        }
-
         const { title, description, price, currencyId, currencyFormat, isFreeShipping, productImage, style, availableSizes, installments } = bodyData;
 
         let updateUser = {};
-        //title validation
+
         if (title == 0) {
             return res.status(400).send({ status: false, msg: "title should not be empty" })
         }
@@ -246,9 +222,9 @@ const updateProduct = async function (req, res) {
 
 
 
-        let updateData = await userModel.findByIdAndUpdate(productId, updateUser, { new: true });
+        let updateData = await productModel.findByIdAndUpdate(productId, updateUser, { new: true });
 
-        res.status(200).send({ status: true, msg: "User Profile Updated Successfully", data: updateData })
+        res.status(200).send({ status: true, msg: "Product Updated Successfully", data: updateData })
 
     }
     catch (error) {
@@ -256,7 +232,40 @@ const updateProduct = async function (req, res) {
         res.status(500).send({ status: false, msg: "err.message" })
     }
 }
-module.exports = { createProduct, updateProduct }
+
+
+//==================================== < Delete Product >======================================
+
+const deleteproduct = async function (req, res) {
+
+    try {
+        let productId = req.params.productId;
+
+        // Check valid for ProductId
+        if (!mongoose.isValidObjectId(productId))
+            res.status(400).send({ status: false, msg: "Please enter a valid productId" })
+
+        // Find product in DB by productId
+        let deletedProduct = await productModel.findById({ _id: productId })
+
+        if (!deletedProduct) {
+            return res.status(404).send({ status: false, msg: "Product Not found" })
+        }
+
+        if (deletedProduct.isDeleted == true) {
+            return res.status(400).send({ status: false, msg: "Product is already deleted" })
+        }
+        else {
+            const deleteProduct = await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true } }, { new: true })
+            return res.status(200).send({ status: true, message: "Product Deleted Successfully", data: deleteProduct })
+        }
+
+    } catch (error) {
+        res.status(500).send({ status: false, message: error.message });
+    }
+}
+
+module.exports = { createProduct, getProducts, getProductById, updateProduct, deleteproduct }
 
 
 
