@@ -227,7 +227,7 @@ const updateUserDetails = async function (req, res) {
         let userId = req.params.userId;
         let bodyData = req.body;
 
-       
+
         if (!validator.isValid(userId)) {
             return res.status(400).send({ status: false, msg: "userId is required for update data" })
         }
@@ -241,26 +241,34 @@ const updateUserDetails = async function (req, res) {
         if (req.userId != userId) {
             return res.status(401).send({ status: false, message: "You're not Authorized" })
         }
-        
+
         const { fname, lname, email, phone, profileImage, password, address } = bodyData;
 
         let updateUser = {};
 
-       
+        // Validation for first and  name :-
         if (fname == 0) {
             return res.status(400).send({ status: false, msg: "first name should not be empty" })
         }
         updateUser["fname"] = fname;
-        
-        if (lname) {
-            updateUser["lname"] = lname;
-        }
 
+        // Validation for last name :-
+        if (lname == 0) {
+            return res.status(400).send({ status: false, msg: "Last name should not be empty" })
+        }
+        updateUser["lname"] = lname;
+
+        // For profileImage
         if (profileImage) {
             if (files && files.length > 0) {
                 profileImage = await uploadFile(files[0]);
             }
             updateUser["profileImage"] = profileImage;
+        }
+
+        // Validation for Email :-
+        if (email == 0) {
+            return res.status(400).send({ status: false, msg: "Email should not be empty" })
         }
 
         if (email) {
@@ -275,6 +283,11 @@ const updateUserDetails = async function (req, res) {
             updateUser["email"] = email;
         }
 
+        // Validation for Password :-
+        if (password == 0) {
+            return res.status(400).send({ status: false, msg: "Password should not be empty" })
+        }
+
         if (password) {
             if (!(password.length >= 8 && password.length <= 15)) {
                 return res.status(400).send({ status: false, msg: "Password should be minimum 8 characters and maximum 15 characters", });
@@ -282,6 +295,11 @@ const updateUserDetails = async function (req, res) {
 
             let hash = bcrypt.hashSync(password, saltRounds);
             updateUser["password"] = hash;
+        }
+
+        // Validation For Phone Number :-
+        if (phone == 0) {
+            return res.status(400).send({ status: false, msg: "Phone Number should not be empty" })
         }
 
         if (phone) {
