@@ -246,10 +246,12 @@ const updateUserDetails = async function (req, res) {
 
         let updateUser = {};
 
-        if (fname) {
-            updateUser["fname"] = fname;
+       
+        if (fname == 0) {
+            return res.status(400).send({ status: false, msg: "first name should not be empty" })
         }
-
+        updateUser["fname"] = fname;
+        
         if (lname) {
             updateUser["lname"] = lname;
         }

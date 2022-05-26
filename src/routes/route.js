@@ -14,6 +14,7 @@ const {userAuth} =require('../middleware/auth')
 
  //@ PRODUCT ROUTE HANDLER
 router.post('/products',productController.createProduct)
+router.put('/products/:productId',productController.updateProduct)
 
 
 

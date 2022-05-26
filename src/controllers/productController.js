@@ -100,17 +100,163 @@ const getProducts = async function (req, res) {
         const { name, size, priceGreaterThan, priceLessThan, priceSort } = data
 
         const findName = await productModel.find({ isDeleted: false }).select({ title: 1, _id: 0 })
-        for (let i = 0; i<findName.length;i++){
-            
+        for (let i = 0; i < findName.length; i++) {
+
+
+
         }
+
+
     } catch (error) {
+        res.status(500).send({ status: false, msg: error.message })
 
     }
 }
+//==========================================<update productId>===========================================================================
+
+// const updateProduct = async function(req, res){
+// try {
+//     let productId = req.params.productId
+//     let data = req.body
+
+//     if (productImage) {
+//         if (files && files.length > 0) {
+//             productImage = await uploadFile(files[0]);
+//         }
+//         updateUser["productImage"] = productImage;
+//     }
+
+
+//     if (Object.keys(data) == 0) {
+//         return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
+//     }
+
+//     if(!mongoose.isValidObjectId(productId)){
+//         return res.status(400).send({status:false ,msg :"productId is invalid to get product data"})
+//     }
+//      let findProduct = await productModel.findOne({_id:productId  ,isDeleted :false})
+//      if(!findProduct){
+//          return res.status(404).send({status:false ,message :"product not Found"})
+//      }
+//      res.status(200).send({status:true ,message:"success" ,data :findProduct})
+
+//      let updateData = await productModel.findByIdAndUpdate(productId, updateProduct, { new: true });
+//     //  if(updateData){
+//     //      return res.status(400).send({status:false , msg: "datails required for product updation"})
+//     //  }
+//          res.status(200).send({ status: true, msg: "Product details Updated Successfully", data: updateData })
 
 
 
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).send({status:false ,message: "error.message"})
+
+//     }
+// }
+
+
+//=========================================================================================
+const updateProduct = async function (req, res) {
+    try {
+
+        let productId = req.params.userId;
+        let bodyData = req.body;
+
+
+        if (!validator.isValid(productId)) {
+            return res.status(400).send({ status: false, msg: "userId is required for update data" })
+        }
+
+
+        if (Object.keys(bodyData) == 0) {
+            return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
+        }
+
+
+        if (req.userId != productId) {
+            return res.status(401).send({ status: false, message: "You're not Authorized" })
+        }
+
+        const { title, description, price, currencyId, currencyFormat, isFreeShipping, productImage, style, availableSizes, installments } = bodyData;
+
+        let updateUser = {};
+        //title validation
+        if (title == 0) {
+            return res.status(400).send({ status: false, msg: "title should not be empty" })
+        }
+        updateUser["title"] = title;
+
+        let titleExisted = await productModel.findOne({ title })
+        if (titleExisted) {
+            return res.status(400).send({ status: false, msg: "Title is already exist" })
+        }
+
+
+        if (description == 0) {
+            return res.status(400).send({ status: false, msg: "description should not be empty" })
+        }
+        updateUser["description"] = description;
+
+
+        if (price == 0) {
+            return res.status(400).send({ status: false, msg: "price should not be empty" })
+        }
+        updateUser["price"] = price;
+
+
+        if (currencyId == 0) {
+            return res.status(400).send({ status: false, msg: "currencyId should not be empty" })
+        }
+        updateUser["currencyId"] = currencyId;
+
+
+        if (currencyFormat == 0) {
+            return res.status(400).send({ status: false, msg: "currencyFormat should not be empty" })
+        }
+        updateUser["currencyFormat"] = currencyFormat;
+
+
+        if (isFreeShipping == 0) {
+            return res.status(400).send({ status: false, msg: "isFreeShipping should not be empty" })
+        }
+        updateUser["isFreeShipping"] = isFreeShipping;
+
+        if (style == 0) {
+            return res.status(400).send({ status: false, msg: "style should not be empty" })
+        }
+        updateUser["style"] = style;
+
+        if (availableSizes == 0) {
+            return res.status(400).send({ status: false, msg: "availableSizes should not be empty" })
+        }
+        updateUser["availableSizes"] = availableSizes;
+
+        if (installments == 0) {
+            return res.status(400).send({ status: false, msg: "installments should not be empty" })
+        }
+        updateUser["installments"] = installments;
+
+        if (productImage) {
+            if (files && files.length > 0) {
+                productImage = await uploadFile(files[0]);
+            }
+            updateUser["productImage"] = productImage;
+        }
 
 
 
-module.exports = { createProduct }
+        let updateData = await userModel.findByIdAndUpdate(productId, updateUser, { new: true });
+
+        res.status(200).send({ status: true, msg: "User Profile Updated Successfully", data: updateData })
+
+    }
+    catch (error) {
+        console.log(error)
+        res.status(500).send({ status: false, msg: "err.message" })
+    }
+}
+module.exports = { createProduct, updateProduct }
+
+
+
