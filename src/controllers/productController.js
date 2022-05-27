@@ -290,6 +290,7 @@ const deleteproduct = async function (req, res) {
         res.status(500).send({ status: false, message: error.message });
     }
 }
+//=====================================================EXPORTING======================================================================
 
 module.exports = { createProduct, getProducts, getProductById, updateProduct, deleteproduct }
 
