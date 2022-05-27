@@ -16,8 +16,6 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
         }
 
-        let { fname, lname, email, phone, password, address } = data
-
         // Profile Image Creation :-
         let files = req.files
         if (!files || files.length == 0) {
@@ -25,6 +23,8 @@ const createUser = async function (req, res) {
         }
         const uploadedFileURL = await aws.uploadFile(files[0])
         data.profileImage = uploadedFileURL
+
+        let { fname, lname, email, phone, password, address } = data
 
         // fname Validation :-
         if(Object.keys(data.fname).length == 0) {
@@ -34,9 +34,17 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "fname is required" })
         }
 
+        if (fname == 0) {
+            return res.status(400).send({ status: false, msg: "first name should not be empty" })
+        }
+
         // lname Validation :-
         if (!validator.isValid(lname)) {
             return res.status(400).send({ status: false, msg: "lname is required" })
+        }
+
+        if (lname == 0) {
+            return res.status(400).send({ status: false, msg: "Last name should not be empty" })
         }
 
         // Email Validation :-
@@ -83,6 +91,10 @@ const createUser = async function (req, res) {
         // Address Validation :-
         if (!validator.isValid(address)) {
             return res.status(400).send({ status: false, msg: "Address is Required" })
+        }
+
+        if (address == 0) {
+            return res.status(400).send({ status: false, msg: "Address should not be empty" })
         }
 
         address = JSON.parse(address)
