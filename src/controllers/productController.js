@@ -1,87 +1,91 @@
 const productModel = require('../models/productModel')
 const aws = require('../aws/aws')
 const validator = require('../validator/validator')
-
 const mongoose = require('mongoose')
 
-
+//======================================== < Create Product > ========================================
 const createProduct = async function (req, res) {
     try {
         let data = req.body
-        let title = req.body.title
-        if (Object.keys(data).length == 0) {
-            return res.status(400).send({ status: false, mgs: 'Provide product details' })
+        if (Object.keys(data) == 0) {
+            return res.status(400).send({ status: false, mgs: 'Bad Request, No Data Provided' })
         }
-        //data = JSON.parse(data)
-        //uploading product image 
+
+        // Creating Product Image :-
         let files = req.files
-        // console.log(files)
+
         if (!files || files.length == 0) {
             return res.status(400).send({ status: false, msg: 'No filse found' })
         }
         const uploadedFileURL = await aws.uploadFile(files[0])
         data.productImage = uploadedFileURL
 
+        let { title, description, price, currencyId, currencyFormat, productImage, availableSizes } = data
 
-
-        if (!validator.isValid(data.title)) {
+        // Validation for title :-
+        if (!validator.isValid(title)) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide Title' })
         }
 
-
-        //check title availablity
         let titleExisted = await productModel.findOne({ title })
         if (titleExisted) {
-            return res.status(400).send({ status: false, msg: "Title is already exist" })
+            return res.status(400).send({ status: false, msg: "Title already exists" })
         }
 
-
-        if (!validator.isValid(data.description)) {
+        // Validation for Description :-
+        if (!validator.isValid(description)) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide Description' })
         }
 
-        if (!validator.isValid(data.price)) {
+        // Validation for Price :-
+        if (!validator.isValid(price)) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide Price ' })
         }
-        // price format validation
-        // if(data.price){
-        //    let price= /^(?:(?:INR)\.?\s?)(\d+(:?\,\d+)?(\,\d+)?(\.\d{1,4})?)[., ]$/.test(price)
-        //    if(!price){
-        //        return res.status(400).send({status:false,msg:"Plz, enter valid format of price"})
-        //    }
-        // }
-        if (!validator.isValid(data.currencyId)) {
+
+        if (!(/^\d{0,8}(\.\d{1,2})?$/.test(price))) {
+            return res.status(400).send({ status: false, msg: "Plz, enter valid format of price" })
+        }
+        // Validation for CurrencyId :-
+        if (!validator.isValid(currencyId)) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide currencyId ' })
         }
-        if (!validator.isValid(data.currencyFormat)) {
+
+        if (currencyId != "INR") {
+            return res.status(400).send({ status: false, mgs: 'CurrencyId Should be in INR ' })
+        }
+
+        // Validation for CurrencyFormat :-
+        if (!validator.isValid(currencyFormat)) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide currencyFormat ' })
         }
-        // if(!validator.isValid(data.isFreeShipping)){
-        //     return res.status(400).send({status:false,mgs:'Plz,Provide isFreeShiping '})
-        // }
 
+        if (currencyFormat != "₹") {
+            return res.status(400).send({ status: false, mgs: 'CurrencyFormat Should be in ₹ ' })
+        }
 
-        if (!validator.isValid(data.productImage)) {
-            return res.status(400).send({ status: false, mgs: 'Plz,Provide ProductImage ' })
+        // Validation for Product Image :-
+        if (!validator.isValid(productImage)) {
+            return res.status(400).send({ status: false, mgs: 'Plz,Provide Product Image ' })
         }
 
 
-        if (!validator.isValid(data.availableSizes)) {
+        // Validation For Available Sizes :-
+        if (!validator.isValid(availableSizes)) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide availableSizes ' })
         }
-        if (data.availableSizes !== 'S' &&
-            data.availableSizes !== 'XS' &&
-            data.availableSizes !== 'M' &&
-            data.availableSizes !== 'X' &&
-            data.availableSizes !== 'L' &&
-            data.availableSizes !== 'XXL' &&
-            data.availableSizes !== 'XL') {
+
+        if (availableSizes !== 'S' &&
+            availableSizes !== 'XS' &&
+            availableSizes !== 'M' &&
+            availableSizes !== 'X' &&
+            availableSizes !== 'L' &&
+            availableSizes !== 'XXL' &&
+            availableSizes !== 'XL') {
             return res.status(400).send({ status: false, msg: 'Provide Size among S,XS,M,X,L,XXL and XL' })
         }
-        //req.data=data;
-        // Creating DOC in DB
+
         let savedPoduct = await productModel.create(data);
-        res.status(201).send({ status: true, msg: 'Success', data: savedPoduct })
+        res.status(201).send({ status: true, msg: 'Product Created Successfully', data: savedPoduct })
 
     } catch (error) {
         res.status(500).send({ status: false, message: error.message })
@@ -91,34 +95,34 @@ const createProduct = async function (req, res) {
 
 //====================================== < Get Product > ==========================================
 
-const getProducts =async function (req,res){
+const getProducts = async function (req, res) {
     try {
-     let data =req.params
-     //console.log(data.availableSizes)
- //Fetching all products
-     if(Object.keys(data).length==0){
-         let allProdtucts =await productModel.find({isDeleted:false}).select({__v:0})
-         if(allProdtucts){
-             return res.status(200).send({status:true,message:'Success',data:allProdtucts})
-         }
-     }
- //Fetchin products using filters
- if(data.availableSizes || data.title || data.price){
- 
-     let filteredProduct=await productModel.find({$and:[data, {isDeleted:false}]})
-     if(filteredProduct.length==0){
-         return res.status(400).send({status:false,message:'No products found'})
-     }
-      res.status(200).send({status:false,message:'Success',data:filteredProduct})
- }
- 
- 
- 
+        let data = req.query
+        //console.log(data.availableSizes)
+        //Fetching all products
+        if (Object.keys(data).length == 0) {
+            let allProdtucts = await productModel.find({ isDeleted: false }).select({ __v: 0 })
+            if (allProdtucts) {
+                return res.status(200).send({ status: true, message: 'Success', data: allProdtucts })
+            }
+        }
+        //Fetchin products using filters
+        if (data.availableSizes || data.title || data.price) {
+
+            let filteredProduct = await productModel.find({ $and: [data, { isDeleted: false }] })
+            if (filteredProduct.length == 0) {
+                return res.status(400).send({ status: false, message: 'No products found' })
+            }
+            res.status(200).send({ status: false, message: 'Success', data: filteredProduct })
+        }
+
+
+
     } catch (error) {
-        res.status(500).send({status:false,message:error.message})
+        res.status(500).send({ status: false, message: error.message })
     }
-      
- }
+
+}
 
 
 //======================================== < Get Product By Params > =================================
@@ -264,7 +268,7 @@ const deleteproduct = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Product is already deleted" })
         }
         else {
-            const deleteProduct = await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true } }, { new: true })
+            const deleteProduct = await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
             return res.status(200).send({ status: true, message: "Product Deleted Successfully", data: deleteProduct })
         }
 
