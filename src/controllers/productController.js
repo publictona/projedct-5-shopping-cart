@@ -155,6 +155,9 @@ const updateProduct = async function (req, res) {
         let productId = req.params.productId;
         let bodyData = req.body;
 
+        if (!mongoose.isValidObjectId(productId))
+            res.status(400).send({ status: false, msg: "Please enter a valid ProductId" })
+
 
         if (!validator.isValid(productId)) {
             return res.status(400).send({ status: false, msg: "userId is required for update data" })
@@ -196,11 +199,19 @@ const updateProduct = async function (req, res) {
         if (currencyId == 0) {
             return res.status(400).send({ status: false, msg: "currencyId should not be empty" })
         }
+
+        if (currencyId != "INR") {
+            return res.status(400).send({ status: false, mgs: 'CurrencyId Should be in INR ' })
+        }
         updateUser["currencyId"] = currencyId;
 
 
         if (currencyFormat == 0) {
             return res.status(400).send({ status: false, msg: "currencyFormat should not be empty" })
+        }
+
+        if (currencyFormat != "₹") {
+            return res.status(400).send({ status: false, mgs: 'CurrencyFormat Should be in ₹ ' })
         }
         updateUser["currencyFormat"] = currencyFormat;
 
