@@ -1,19 +1,23 @@
 const productModel = require('../models/productModel')
-const aws = require('../aws/aws')
+const aws = require('../aws/aws');
 const validator = require('../validator/validator')
-
 const mongoose = require('mongoose')
+
+
+
+
+
 
 
 const createProduct = async function (req, res) {
     try {
         let data = req.body
         let title = req.body.title
+        let availableSizes =req.query
         if (Object.keys(data).length == 0) {
             return res.status(400).send({ status: false, mgs: 'Provide product details' })
         }
-        //data = JSON.parse(data)
-        //uploading product image 
+       
         let files = req.files
         // console.log(files)
         if (!files || files.length == 0) {
@@ -43,43 +47,47 @@ const createProduct = async function (req, res) {
         if (!validator.isValid(data.price)) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide Price ' })
         }
-        // price format validation
-        // if(data.price){
-        //    let price= /^(?:(?:INR)\.?\s?)(\d+(:?\,\d+)?(\,\d+)?(\.\d{1,4})?)[., ]$/.test(price)
-        //    if(!price){
-        //        return res.status(400).send({status:false,msg:"Plz, enter valid format of price"})
-        //    }
-        // }
-        if (!validator.isValid(data.currencyId)) {
-            return res.status(400).send({ status: false, mgs: 'Plz,Provide currencyId ' })
+        
+        
+        if (!validator.isValid(data.currencyId) &&(data.currencyId !='INR')) {
+            return res.status(400).send({ status: false, mgs: 'Plz,Provide valid currencyId, Hint:INR ' })
         }
-        if (!validator.isValid(data.currencyFormat)) {
+        if (!validator.isValid(data.currencyFormat)&& (data.currencyFormat !="₹")) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide currencyFormat ' })
         }
-        // if(!validator.isValid(data.isFreeShipping)){
-        //     return res.status(400).send({status:false,mgs:'Plz,Provide isFreeShiping '})
-        // }
+        
 
 
         if (!validator.isValid(data.productImage)) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide ProductImage ' })
         }
 
-
+ console.log((data.availableSizes) )
+ 
+ 
+           
+     
+ 
         if (!validator.isValid(data.availableSizes)) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide availableSizes ' })
         }
-        if (data.availableSizes !== 'S' &&
-            data.availableSizes !== 'XS' &&
-            data.availableSizes !== 'M' &&
-            data.availableSizes !== 'X' &&
-            data.availableSizes !== 'L' &&
-            data.availableSizes !== 'XXL' &&
-            data.availableSizes !== 'XL') {
-            return res.status(400).send({ status: false, msg: 'Provide Size among S,XS,M,X,L,XXL and XL' })
-        }
-        //req.data=data;
-        // Creating DOC in DB
+
+        let enumSize = ["S", "XS", "M", "X", "L", "XXL", "XL"]
+    for (let i = 0; i < availableSizes.length; i++) {
+      if (!enumSize.includes(availableSizes[i])) {
+        return res.status(400).send({
+          status: false,
+          message: "availableSizes should be-[S, XS,M,X, L,XXL, XL]"
+        })
+      }
+    
+        
+        
+    
+
+            
+    }
+        
         let savedPoduct = await productModel.create(data);
         res.status(201).send({ status: true, msg: 'Success', data: savedPoduct })
 

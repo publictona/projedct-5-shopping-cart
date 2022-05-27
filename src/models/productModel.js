@@ -28,7 +28,7 @@ const productSchema =new mongoose.Schema({
     currencyFormat: {
         type:String,
         required:true, 
-        trim:true
+       
     },
     isFreeShipping: {
         type:Boolean,
@@ -45,8 +45,8 @@ const productSchema =new mongoose.Schema({
         trim:true
     },
     availableSizes:{
-        type:String,
-         enum:["S", "XS","M","X", "L","XXL", "XL"]
+        type:[{String,
+         enum:["S", "XS","M","X", "L","XXL", "XL"]}]
         },
 
     installments: {

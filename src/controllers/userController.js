@@ -27,6 +27,9 @@ const createUser = async function (req, res) {
         data.profileImage = uploadedFileURL
 
         // fname Validation :-
+        if(Object.keys(data.fname).length == 0) {
+            return res.status(400).send({ status: false, msg: "Plz, Provided First Name" })
+        }
         if (!validator.isValid(fname)) {
             return res.status(400).send({ status: false, msg: "fname is required" })
         }
