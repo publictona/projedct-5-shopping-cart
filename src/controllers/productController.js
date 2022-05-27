@@ -74,15 +74,23 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide availableSizes ' })
         }
 
-        if (availableSizes !== 'S' &&
-            availableSizes !== 'XS' &&
-            availableSizes !== 'M' &&
-            availableSizes !== 'X' &&
-            availableSizes !== 'L' &&
-            availableSizes !== 'XXL' &&
-            availableSizes !== 'XL') {
-            return res.status(400).send({ status: false, msg: 'Provide Size among S,XS,M,X,L,XXL and XL' })
-        }
+        let sizes = availableSizes.toUpperCase().split(",")
+        let arr = ["S", "XS","M","X", "L","XXL", "XL"]
+
+        if(sizes.some(x => !arr.includes(x.trim())))
+           return res.status(400).send({status : false, message : `available sizes must be in ${arr}`})
+
+        data['availableSizes'] = sizes
+
+        // if (availableSizes !== 'S' &&
+        //     availableSizes !== 'XS' &&
+        //     availableSizes !== 'M' &&
+        //     availableSizes !== 'X' &&
+        //     availableSizes !== 'L' &&
+        //     availableSizes !== 'XXL' &&
+        //     availableSizes !== 'XL') {
+        //     return res.status(400).send({ status: false, msg: 'Provide Size among S,XS,M,X,L,XXL and XL' })
+        // }
 
         let savedPoduct = await productModel.create(data);
         res.status(201).send({ status: true, msg: 'Product Created Successfully', data: savedPoduct })
@@ -243,11 +251,8 @@ const updateProduct = async function (req, res) {
             updateUser["productImage"] = productImage;
         }
 
-
-
         let updateData = await productModel.findByIdAndUpdate(productId, updateUser, { new: true });
-
-        res.status(200).send({ status: true, msg: "Product Updated Successfully", data: updateData })
+        return res.status(200).send({ status: true, msg: "Product Updated Successfully", data: updateData })
 
     }
     catch (error) {
@@ -264,13 +269,11 @@ const deleteproduct = async function (req, res) {
     try {
         let productId = req.params.productId;
 
-        // Check valid for ProductId
         if (!mongoose.isValidObjectId(productId))
             res.status(400).send({ status: false, msg: "Please enter a valid productId" })
 
-        // Find product in DB by productId
-        let deletedProduct = await productModel.findById({ _id: productId })
 
+        let deletedProduct = await productModel.findById({ _id: productId })
         if (!deletedProduct) {
             return res.status(404).send({ status: false, msg: "Product Not found" })
         }
