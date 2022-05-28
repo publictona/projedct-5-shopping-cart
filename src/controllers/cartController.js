@@ -13,6 +13,9 @@ const createCart = async function (req, res) {
         if (Object.keys(data) == 0) {
             return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
         }
+      let 
+
+
         let { productId, items, quantity, totalPrice, totalItems } = data
 
         let findCart = await cartModel.findOne({ _id: userId })
