@@ -7,18 +7,20 @@ const productSchema = new mongoose.Schema({
 
  userId: {
      type:ObjectId,
-      refs:User, 
+      refs:'User', 
       required:true
     },
   items: [{
-    productId: {types: ObjectId,
-         refs:productModel, 
+    productId: {
+        type: ObjectId,
+         refs:"Product", 
          required:true
         },
     quantity: {
         type:Number,
          required:true,
-          default: 1}
+          default: 1
+        }
   }],
   totalPrice: {
       type:Number, 
@@ -51,6 +53,7 @@ const productSchema = new mongoose.Schema({
   isDeleted: {
       type:Boolean,
        default: false
-    },
+    }
   },{timestamps:true});
+
   module.exports =mongoose.model('Order',productSchema);
