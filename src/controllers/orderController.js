@@ -17,9 +17,9 @@ const  createOrder=async function(req,res){
     if(Object.keys(data).length===0){
             return res.status(400).send({status:false,message:"Please enter data to create the order"})
         }
-    //  if(!mongoose.isValidObjectId(userId)){
-    //     return res.status(400).send({status:false,message:"Please enter a valid userId"})
-    // }
+     if(!mongoose.isValidObjectId(userId)){
+        return res.status(400).send({status:false,message:"Please enter a valid userId"})
+    }
     if(!validator.isValid(userId)){
         return res.status(400).send({status:false,message:'userId is required'})
     }
@@ -28,9 +28,6 @@ let userExist=await userModel.findOne({userId,isDeleted:false})
 if(!userExist){
     return res.status(400).send({status:false,message:"User is not found"})
 }
-//check for cart exist or not
-//     return res.status(400).send({satus:false,message:"Cart is not found"})
-//}
 //create order
   let cartData={
 
