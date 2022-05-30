@@ -22,7 +22,7 @@ const createProduct = async function (req, res) {
         const uploadedFileURL = await aws.uploadFile(files[0])
         data.productImage = uploadedFileURL
 
-        let { title, description, price, currencyId, currencyFormat, productImage, availableSizes } = data
+        let { title, description, price, currencyId, currencyFormat, productImage, availableSizes,style,installments } = data
 
         // Validation for title :-
         if (!validator.isValid(title)) {
@@ -76,18 +76,37 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide availableSizes ' })
         }
 //Selection of size
-//data.availableSizes=data;
+
+//data.availableSizes=JSON.parse(availableSizes)
 //console.log(data.availableSizes)
-        let Sizes = ["S", "XS", "M","L", "X","XL", "XXL" ]
-    for (let i = 0; i < availableSizes.length; i++) {
-      if (!Sizes.includes(availableSizes[i])) {
-        return res.status(400).send({status: false,message: " size must among S, XS,M,X, L,XXL and XL"})
-      }
+    //     let Sizes = ["S", "XS", "M","L", "X","XL", "XXL" ]
+    // for (let i = 0; i < availableSizes.length; i++) {
+    //   if (!Sizes.includes(availableSizes[i])) {
+    //     return res.status(400).send({status: false,message: " size must among S, XS,M,X, L,XXL and XL"})
+    //   }
+    //  }
+    let sizeArray = availableSizes.split(",").map(x => x.trim())
+        for (let i = 0; i < sizeArray.length; i++) {
+            if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizeArray[i]))) {
+                return res.status(400).send({ status: false, message: `Available Sizes must be among ${["S", "XS", "M", "X", "L", "XXL", "XL"]}` })
+            }
+        }
+
+    let productData = {
+        title,
+        description,
+        price,
+        currencyId,
+        currencyFormat,
+        productImage:data.productImage,
+        style,
+        availableSizes:sizeArray,
+        installments
+
+
     }
 
-        
-
-        let savedPoduct = await productModel.create(data);
+        let savedPoduct = await productModel.create(productData);
         res.status(201).send({ status: true, msg: 'Product Created Successfully', data: savedPoduct })
 
     } catch (error) {
@@ -101,27 +120,58 @@ const createProduct = async function (req, res) {
 const getProducts = async function (req, res) {
     try {
         let data = req.query
-        //console.log(data.availableSizes)
+        let priceGreaterThan = req.query.priceGreaterThan
+        let priceLessThan = req.query.priceLessThan
+        let priceSort = req.query.priceSort
+        let name=req.query.name
+        
+
         //Fetching all products
         if (Object.keys(data).length == 0) {
-            let allProdtucts = await productModel.find({ isDeleted: false }).select({ __v: 0 })
+            let allProdtucts = await productModel.find({ isDeleted: false })
             if (allProdtucts) {
                 return res.status(200).send({ status: true, message: 'Success', data: allProdtucts })
             }
         }
-        //Fetchin products using filters
-        if (data.availableSizes || data.title || data.price) {
 
-            let filteredProduct = await productModel.find({ $and: [data, { isDeleted: false }] })
-            if (filteredProduct.length == 0) {
-                return res.status(400).send({ status: false, message: 'No products found' })
-            }
-            res.status(200).send({ status: false, message: 'Success', data: filteredProduct })
+    //Fetchin products using filters,
+    if(!validator.isValid(name)){
+        return res.status(400).send({status:false,message:'Plz, Provide name of Product'})
+    }
+    if(!validator.isValid(req.query.size)){
+        return res.status(400).send({status:false,message:'Plz, Provide size amogs S,XS,M,X,L,XXL and XL'})
+    }
+       
+    if(priceSort!==1||priceSort!==-1){
+        return res.status(400).send({status:false,message:'Plz, Provide priceSort as 1 or -1'})
+    }
+    if (priceGreaterThan && priceLessThan) {
+        let  productFound = await productModel.find({$and: [{isDeleted:false}, { price: { $gt: priceGreaterThan } }, {price: { $lt: priceLessThan }}]
+        }).sort({ price:priceSort })
+        if (productFound.length == 0) {
+            return res.status(400).send({ status: false, message: "No products found" })
         }
+        return res.status(200).send({ status: true, message: "Success", data: productFound }).sort({ price:priceSort })
+    }
 
+    if (priceGreaterThan || priceLessThan) {
+        const productFound= await productModel.find({isDeleted:false}).sort({ price:priceSort })
+        if (productFound.length == 0) {
+            return res.status(400).send({ status: false, message: "No available products" })
+        }
+        return res.status(200).send({ status: true, message: "Success", data: productFound })
+    }
 
+   
+//       let filteredProduct = await productModel.find({ $and: [ { isDeleted: false },query]}).collation({locale: "en", strength: 2}).sort({price:1})
 
-    } catch (error) {
+//       if(filteredProduct){
+//         return res.status(400).send({status:false,message:"Success",data:filteredProduct})
+//       }
+  }
+
+     
+    catch (error) {
         res.status(500).send({ status: false, message: error.message })
     }
 

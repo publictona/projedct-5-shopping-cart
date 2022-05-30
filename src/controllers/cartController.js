@@ -88,7 +88,7 @@ const createCart = async function (req, res) {
         }
 
         let findCart = await cartModel.findOne({ _id: userId }).populate('items.productId')
-        console.log(findCart)
+       // console.log(findCart)
         if (!findCart) {
 
             let data = {
@@ -182,22 +182,26 @@ const getCart = async function (req, res) {
 
     try {
         let data = req.body
-        // console.log(data)
         let userId = req.params.userId
-        //console.log(userId)
+        
         if (Object.keys(userId) == 0) {
             return res.status(400).send({ status: false, msg: "Plz, provide userId" })
         }
 
-
+//cart from cache
         let cartFromCache = await GET_ASYNC(userId)
         if (cartFromCache) {
             cartFromCache = JSON.parse(cartFromCache)
             return res.status(200).send({ status: true, msg: "Cart from cache", data: cartFromCache })
         }
+        //if not in cache then get from db and set in cache 
         const findCart = await cartModel.findOne({ userId, isDeleted: false }).select({ __v: 0 }).populate('items.productId')
+       await SET_ASYNC(`${userId}`,JSON.stringify(findcart))
         if (findCart) {
             return res.status(200).send({ status: true, msg: "Cart found", data: findCart })
+        }
+        else {
+            return res.status(404).send({ status: false, msg: "Cart not found" })
         }
     } catch (error) {
         res.status(500).send({ status: false, message: error.message })
