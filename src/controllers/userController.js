@@ -27,15 +27,13 @@ const createUser = async function (req, res) {
         let { fname, lname, email, phone, password, address } = data
 
         // fname Validation :-
-        if(Object.keys(data.fname).length == 0) {
-            return res.status(400).send({ status: false, msg: "Plz, Provided First Name" })
-        }
+
         if (!validator.isValid(fname)) {
             return res.status(400).send({ status: false, msg: "fname is required" })
         }
 
-        if (fname == 0) {
-            return res.status(400).send({ status: false, msg: "first name should not be empty" })
+        if (!validator.isValidName.test(fname)){
+            return res.status(400).send({status:false, msg:"Plz provide a valid First name"})
         }
 
         // lname Validation :-
@@ -43,8 +41,8 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "lname is required" })
         }
 
-        if (lname == 0) {
-            return res.status(400).send({ status: false, msg: "Last name should not be empty" })
+        if (!validator.isValidName.test(lname)){
+            return res.status(400).send({status:false, msg:"Plz provide a valid Last name"})
         }
 
         // Email Validation :-
@@ -52,7 +50,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false.valueOf, msg: "Email is required" })
         }
 
-        if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))) {
+        if (!validator.isValidEmail.test(email)) {
             return res.status(400).send({ status: false, msg: "Please provide a valid email" })
         }
 
@@ -66,7 +64,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Phone Number Is Required" })
         }
 
-        if (!(/^(?:(?:\+|0{0,2})91(\s*|[\-])?|[0]?)?([6789]\d{2}([ -]?)\d{3}([ -]?)\d{4})$/.test(phone))) {
+        if (!validator.isValidPhone.test(phone)) {
             return res.status(400).send({ status: false, msg: "Please Provide a Valid Phone Number" })
         }
 
@@ -91,10 +89,6 @@ const createUser = async function (req, res) {
         // Address Validation :-
         if (!validator.isValid(address)) {
             return res.status(400).send({ status: false, msg: "Address is Required" })
-        }
-
-        if (address == 0) {
-            return res.status(400).send({ status: false, msg: "Address should not be empty" })
         }
 
         address = JSON.parse(address)
@@ -141,6 +135,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Enter Valid Pincode for Billing Address" })
         }
 
+
         data.address = address
         let savedData = await userModel.create(data)
         res.status(201).send({ status: true, msg: "User Successfully Created", data: savedData })
@@ -167,7 +162,7 @@ const loginUser = async function (req, res) {
             return res.status(400).send({ status: false, message: "Email is required." });
         }
 
-        if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email.trim()))) {
+        if (!validator.isValidEmail.test(email)) {
             return res.status(400).send({ status: false, msg: "Please provide a valid email" })
         }
 
@@ -186,7 +181,7 @@ const loginUser = async function (req, res) {
 
         let checkPassword = matchUser.password
         let checkUser = await bcrypt.compare(password, checkPassword)
-        if (checkUser == false) {
+        if (!checkUser) {
             return res.status(400).send({ status: false, message: "Password is Incorrect" });
         }
 
@@ -201,7 +196,7 @@ const loginUser = async function (req, res) {
                 expiresIn: "3600sec",
             });
 
-        res.setHeader("Authorization", "Bearer")
+        res.setHeader("Authorization", token)
         return res.status(200).send({ status: true, message: "User Logged in successfully", data: { userId: matchUser._id, token: token } });
     }
     catch (error) {
