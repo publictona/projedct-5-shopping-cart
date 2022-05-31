@@ -27,15 +27,13 @@ const createUser = async function (req, res) {
         let { fname, lname, email, phone, password, address } = data
 
         // fname Validation :-
-        if(Object.keys(data.fname).length == 0) {
-            return res.status(400).send({ status: false, msg: "Plz, Provided First Name" })
-        }
+
         if (!validator.isValid(fname)) {
             return res.status(400).send({ status: false, msg: "fname is required" })
         }
 
-        if (fname == 0) {
-            return res.status(400).send({ status: false, msg: "first name should not be empty" })
+        if (!validator.isValidName.test(fname)) {
+            return res.status(400).send({ status: false, msg: "Plz provide a valid First name" })
         }
 
         // lname Validation :-
@@ -43,8 +41,8 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "lname is required" })
         }
 
-        if (lname == 0) {
-            return res.status(400).send({ status: false, msg: "Last name should not be empty" })
+        if (!validator.isValidName.test(lname)) {
+            return res.status(400).send({ status: false, msg: "Plz provide a valid Last name" })
         }
 
         // Email Validation :-
@@ -52,7 +50,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false.valueOf, msg: "Email is required" })
         }
 
-        if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))) {
+        if (!validator.isValidEmail.test(email)) {
             return res.status(400).send({ status: false, msg: "Please provide a valid email" })
         }
 
@@ -66,7 +64,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Phone Number Is Required" })
         }
 
-        if (!(/^(?:(?:\+|0{0,2})91(\s*|[\-])?|[0]?)?([6789]\d{2}([ -]?)\d{3}([ -]?)\d{4})$/.test(phone))) {
+        if (!validator.isValidPhone.test(phone)) {
             return res.status(400).send({ status: false, msg: "Please Provide a Valid Phone Number" })
         }
 
@@ -91,10 +89,6 @@ const createUser = async function (req, res) {
         // Address Validation :-
         if (!validator.isValid(address)) {
             return res.status(400).send({ status: false, msg: "Address is Required" })
-        }
-
-        if (address == 0) {
-            return res.status(400).send({ status: false, msg: "Address should not be empty" })
         }
 
         address = JSON.parse(address)
@@ -141,6 +135,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Enter Valid Pincode for Billing Address" })
         }
 
+
         data.address = address
         let savedData = await userModel.create(data)
         res.status(201).send({ status: true, msg: "User Successfully Created", data: savedData })
@@ -167,7 +162,7 @@ const loginUser = async function (req, res) {
             return res.status(400).send({ status: false, message: "Email is required." });
         }
 
-        if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email.trim()))) {
+        if (!validator.isValidEmail.test(email)) {
             return res.status(400).send({ status: false, msg: "Please provide a valid email" })
         }
 
@@ -186,7 +181,7 @@ const loginUser = async function (req, res) {
 
         let checkPassword = matchUser.password
         let checkUser = await bcrypt.compare(password, checkPassword)
-        if (checkUser == false) {
+        if (!checkUser) {
             return res.status(400).send({ status: false, message: "Password is Incorrect" });
         }
 
@@ -201,7 +196,7 @@ const loginUser = async function (req, res) {
                 expiresIn: "3600sec",
             });
 
-        res.setHeader("Authorization", "Bearer")
+        res.setHeader("Authorization", token)
         return res.status(200).send({ status: true, message: "User Logged in successfully", data: { userId: matchUser._id, token: token } });
     }
     catch (error) {
@@ -247,6 +242,9 @@ const updateUserDetails = async function (req, res) {
             return res.status(400).send({ status: false, msg: "userId is required for update data" })
         }
 
+        if (!mongoose.isValidObjectId(userId))
+            res.status(400).send({ status: false, msg: "Please enter a valid UserId" })
+
 
         if (Object.keys(bodyData) == 0) {
             return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
@@ -265,15 +263,26 @@ const updateUserDetails = async function (req, res) {
         if (fname == 0) {
             return res.status(400).send({ status: false, msg: "first name should not be empty" })
         }
+
+        if (!validator.isValidName.test(fname)) {
+            return res.status(400).send({ status: false, msg: "Plz provide a valid First name" })
+        }
+
         updateUser["fname"] = fname;
 
         // Validation for last name :-
         if (lname == 0) {
             return res.status(400).send({ status: false, msg: "Last name should not be empty" })
         }
+
+        if (!validator.isValidName.test(lname)) {
+            return res.status(400).send({ status: false, msg: "Plz provide a valid Last name" })
+        }
+
         updateUser["lname"] = lname;
 
         // For profileImage
+        let files = req.files
         if (profileImage) {
             if (files && files.length > 0) {
                 profileImage = await uploadFile(files[0]);
@@ -287,7 +296,7 @@ const updateUserDetails = async function (req, res) {
         }
 
         if (email) {
-            if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email.trim()))) {
+            if (!validator.isValidEmail.test(email)) {
                 return res.status(400).send({ status: false, message: "Please enter valid a email " });
             }
 
@@ -318,7 +327,7 @@ const updateUserDetails = async function (req, res) {
         }
 
         if (phone) {
-            if (!(/^(?:(?:\+|0{0,2})91(\s*|[\-])?|[0]?)?([6789]\d{2}([ -]?)\d{3}([ -]?)\d{4})$/.test(phone))) {
+            if (!validator.isValidPhone.test(phone)) {
                 return res.status(400).send({ status: false, message: "Please enter a valid phone number" });
             }
 
@@ -329,6 +338,94 @@ const updateUserDetails = async function (req, res) {
             updateUser["phone"] = phone;
         }
 
+
+        let jsonData = JSON.parse(JSON.stringify(bodyData))
+        if (jsonData.address == 0) {
+            return res.status(400).send({ status: false, msg: "Please add shipping or billing address to update" })
+        }
+
+        if (address) {
+            let jsonAddress = JSON.parse(JSON.stringify(address))
+            if (!(Object.keys(jsonAddress).includes("shipping") || Object.keys(jsonAddress).includes("billing"))) {
+                return res.status(400).send({ msg: "Please add shipping or billing address to update" })
+            }
+
+            let { shipping, billing } = jsonData.address
+
+            if (shipping == 0) {
+                return res.status(400).send({ status: false, msg: " Please add street ,city or pincode to update for shipping" })
+            }
+
+            if (shipping) {
+                if (!(Object.keys(shipping).includes("street") || Object.keys(shipping).includes("city") || Object.keys(shipping).includes("pincode"))) {
+                    return res.status(400).send({ msg: "Please add street,city or pincode for shipping to update" })
+                }
+
+                if (shipping.street == 0)
+                    return res.status(400).send({ status: false, message: `Please provide shipping address's Street` });
+
+                if (shipping.city == 0)
+                    return res.status(400).send({ status: false, message: `Please provide shipping address's city` });
+
+                if (shipping.pincode == 0)
+                    return res.status(400).send({ status: false, message: `Please provide shipping address's pincode` });
+
+                if (shipping.pincode) {
+                    if (!(/^[1-9][0-9]{5}$/.test(jsonData.address.shipping.pincode))) {
+                        return res.status(400).send({ status: false, msg: "Pleasee provide a valid pincode to update" })
+                    }
+                }
+
+                // var shippingStreet = shipping.street
+                // var shippingCity = shipping.city
+                // var shippingPincode = shipping.pincode
+                updateUser['address.shipping.street'] = address.shipping.street
+                updateUser['address.shipping.city'] = address.shipping.city
+                updateUser['address.shipping.pincode'] = address.shipping.pincode
+            }
+
+            if (billing == 0) {
+                return res.status(400).send({ status: false, msg: " Please add street ,city or pincode to update for billing" })
+            }
+
+            if (billing) {
+                if (!(Object.keys(billing).includes("street") || Object.keys(billing).includes("city") || Object.keys(billing).includes("pincode"))) {
+                    return res.status(400).send({ msg: "Please add street,city or pincode for billing to update" })
+                }
+
+                if (billing.street == 0)
+                    return res.status(400).send({ status: false, message: `Please provide billing address's Street` });
+
+                if (billing.city == 0)
+                    return res.status(400).send({ status: false, message: `Please provide billing address's city` });
+
+                if (billing.pincode == 0)
+                    return res.status(400).send({ status: false, message: `Please provide billing address's pincode` });
+
+                if (billing.pincode) {
+                    if (!(/^[1-9][0-9]{5}$/.test(jsonData.address.billing.pincode))) {
+                        return res.status(400).send({ status: false, msg: "Pleasee provide a valid pincode to update" })
+                    }
+                }
+
+                updateUser['address.billing.street'] = address.billing.street
+                updateUser['address.billing.city'] = address.billing.city
+                updateUser['address.billing.pincode'] = address.billing.pincode
+                // var billingStreet = billing.street
+                // var billingCity = billing.city
+                // var billingPincode = billing.pincode
+
+
+            }
+        }
+
+
+
+
+
+
+        /*
+        address = JSON.parse(address)
         if (address) {
             if (address.shipping) {
                 if (address.shipping.street) {
@@ -363,8 +460,8 @@ const updateUserDetails = async function (req, res) {
                     updateUser['address.billing.pincode'] = address.billing.pincode;
                 }
             }
-        }
-
+        }*/
+        //  data.address = address
         let updateData = await userModel.findByIdAndUpdate(userId, updateUser, { new: true });
 
         res.status(200).send({ status: true, msg: "User Profile Updated Successfully", data: updateData })

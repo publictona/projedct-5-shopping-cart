@@ -3,27 +3,9 @@ const productModel = require("../models/productModel")
 const cartModel = require("../models/cartModel")
 const validator = require("../validator/validator")
 const mongoose = require('mongoose')
-const redis = require('redis')
-const { promisify } = require('util')
 
 
 
-const redisClient = redis.createClient(
-    14169,
-    "redis-14169.c16.us-east-1-2.ec2.cloud.redislabs.com",
-
-    { no_ready_check: true }
-);
-redisClient.auth("XpjNU5wqWNRfxsvtC18K9eXU43xR0FZb", function (err) {
-    if (err) throw err;
-});
-
-redisClient.on("connect", async function () {
-    console.log("Connected to Redis..");
-});
-
-const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
-const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
 
 const createCart = async function (req, res) {
     try {
