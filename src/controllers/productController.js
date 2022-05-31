@@ -142,21 +142,22 @@ const getProducts = async function (req, res) {
         return res.status(400).send({status:false,message:'Plz, Provide size amogs S,XS,M,X,L,XXL and XL'})
     }
        
-    if(priceSort!==1||priceSort!==-1){
-        return res.status(400).send({status:false,message:'Plz, Provide priceSort as 1 or -1'})
-    }
+    // if(priceSort!==1||priceSort!==-1){
+    //     return res.status(400).send({status:false,message:'Plz, Provide priceSort as 1 or -1'})
+    // }
+    //if(price>1000&&)
     if (priceGreaterThan && priceLessThan) {
         let  productFound = await productModel.find({$and: [{isDeleted:false}, { price: { $gt: priceGreaterThan } }, {price: { $lt: priceLessThan }}]
         }).sort({ price:priceSort })
-        if (productFound.length == 0) {
+        if (!productFound) {
             return res.status(400).send({ status: false, message: "No products found" })
         }
-        return res.status(200).send({ status: true, message: "Success", data: productFound }).sort({ price:priceSort })
+        return res.status(200).send({ status: true, message: "Success", data: productFound })
     }
 
-    if (priceGreaterThan || priceLessThan) {
+    else if (priceGreaterThan || priceLessThan) {
         const productFound= await productModel.find({isDeleted:false}).sort({ price:priceSort })
-        if (productFound.length == 0) {
+        if (!productFound) {
             return res.status(400).send({ status: false, message: "No available products" })
         }
         return res.status(200).send({ status: true, message: "Success", data: productFound })
