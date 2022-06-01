@@ -286,22 +286,28 @@ const updateProduct = async function (req, res) {
         }
         updateUser["installments"] = installments;
 
-        let file =req.files
-
-        if (productImage) {
-            if (file && file.length > 0) {
-                productImage = await uploadFile(file[0]);
+          
+        let files =req.files
+     if (files && files.length > 0) {
+               let productImage = await uploadFile(files[0]);
+               bodyData.productImage = productImage;
+               let uploadImage= await productModel.findOneAndUpdate({ _id: productId }, { $set: updateUser }, { new: true })
+               res.status(200).send({ status: true, msg: "Product Updated Successfully", data: uploadImage })
+            }
+            else{
+                let uploadImage= await productModel.findOneAndUpdate({ _id: productId }, { $set: updateUser }, { new: true })
+                res.status(200).send({ status: true, msg: "Product Updated Successfully", data: uploadImage })
             }
             updateUser["productImage"] = productImage;
-        }
+        
+    
+        // if (productImage == 0) {
+        //     return res.status(400).send({ status: false, msg: "productImage should not be empty" })
+        // }
+        // updateUser["productImage"] = productImage;
 
-        if (productImage == 0) {
-            return res.status(400).send({ status: false, msg: "productImage should not be empty" })
-        }
-        updateUser["productImage"] = productImage;
-
-        let updateData = await productModel.findByIdAndUpdate(productId, updateUser, { new: true });
-        return res.status(200).send({ status: true, msg: "Product Updated Successfully", data: updateData })
+        // let updateData = await productModel.findByIdAndUpdate(productId, updateUser, { new: true });
+        // return res.status(200).send({ status: true, msg: "Product Updated Successfully", data: updateData })
 
     }
     catch (error) {
