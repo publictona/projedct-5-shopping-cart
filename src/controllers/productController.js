@@ -141,12 +141,7 @@ const getProducts = async function (req, res) {
                 return res.status(200).send({ status: true, message: 'Success', data: filteredProducts })
             }
         }
-       
-        
-        
-       
-
-        if (availableSizes) {
+      if (availableSizes) {
             filteredProducts = await productModel.find({ isDeleted: false, availableSizes: availableSizes })
             return res.status(200).send({ status: false, message: 'Succes', data: filteredProducts })
         }
@@ -161,7 +156,7 @@ const getProducts = async function (req, res) {
             if (priceGreaterThan === priceLessThan) {
                 return res.status(400).send({ status: false, message: 'Plz, Provide valid price range' })
             }
-           
+
             let productFound = await productModel.find({
                 $and: [{ isDeleted: false }, { price: { $gt: priceGreaterThan } },
                 { price: { $lt: priceLessThan } }]
