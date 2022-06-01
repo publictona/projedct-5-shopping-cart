@@ -137,7 +137,7 @@ const getProducts = async function (req, res) {
         //Fetchin products using filters,
         if (title) {
             let filteredProducts = await productModel.find({ isDeleted: false, title: title }).collation({ locale: 'en', strength: 2 })
-            if (filteredProducts.length===0) {
+            if (filteredProducts.length === 0) {
                 return res.status(404).send({ status: false, message: 'No Products Found' })
             }
             return res.status(200).send({ status: true, message: 'Success', data: filteredProducts })
@@ -162,30 +162,30 @@ const getProducts = async function (req, res) {
                 $and: [{ isDeleted: false }, { price: { $gt: priceGreaterThan } },
                 { price: { $lt: priceLessThan } }]
             }).sort({ price: priceSort })
-            if (productFound.length===0) {
+            if (productFound.length === 0) {
                 return res.status(400).send({ status: false, message: "No products found" })
-                
+
             }
             return res.status(200).send({ status: true, message: "Success", data: productFound })
-           
+
         }
 
         if (priceGreaterThan) {
             let productFound = await productModel.find({ $and: [{ isDeleted: false }, { price: { $gt: priceGreaterThan } }] }).sort({ price: priceSort })
             console.log(productFound)
-            if (productFound.length===0) {
+            if (productFound.length === 0) {
                 return res.status(400).send({ status: false, message: "No available products" })
             }
             return res.status(200).send({ status: true, message: "Success", data: productFound })
-            
+
 
         }
         else if (priceLessThan) {
             let productFound = await productModel.find({ $and: [{ isDeleted: false }, { price: { $lt: priceLessThan } }] }).sort({ price: priceSort })
-            if (productFound.length===0) {
+            if (productFound.length === 0) {
                 return res.status(400).send({ status: false, message: 'No available products' })
             }
-             return res.status(200).send({ status: true, message: "Success", data: productFound })
+            return res.status(200).send({ status: true, message: "Success", data: productFound })
 
         }
     }
@@ -240,7 +240,7 @@ const updateProduct = async function (req, res) {
         }
 
 
-        const { title, description, price, currencyId, currencyFormat, isFreeShipping, productImage, style, availableSizes, installments } = bodyData;
+        const { title, description, price, isFreeShipping, productImage, style, availableSizes, installments } = bodyData;
 
         let updateUser = {};
 
@@ -266,27 +266,6 @@ const updateProduct = async function (req, res) {
         }
         updateUser["price"] = price;
 
-
-        if (currencyId == 0) {
-            return res.status(400).send({ status: false, msg: "currencyId should not be empty" })
-        }
-
-        if (currencyId != "INR") {
-            return res.status(400).send({ status: false, mgs: 'CurrencyId Should be in INR ' })
-        }
-        updateUser["currencyId"] = currencyId;
-
-
-        if (currencyFormat == 0) {
-            return res.status(400).send({ status: false, msg: "currencyFormat should not be empty" })
-        }
-
-        if (currencyFormat != "₹") {
-            return res.status(400).send({ status: false, mgs: 'CurrencyFormat Should be in ₹ ' })
-        }
-        updateUser["currencyFormat"] = currencyFormat;
-
-
         if (isFreeShipping == 0) {
             return res.status(400).send({ status: false, msg: "isFreeShipping should not be empty" })
         }
@@ -307,12 +286,19 @@ const updateProduct = async function (req, res) {
         }
         updateUser["installments"] = installments;
 
+        let file =req.files
+
         if (productImage) {
-            if (files && files.length > 0) {
-                productImage = await uploadFile(files[0]);
+            if (file && file.length > 0) {
+                productImage = await uploadFile(file[0]);
             }
             updateUser["productImage"] = productImage;
         }
+
+        if (productImage == 0) {
+            return res.status(400).send({ status: false, msg: "productImage should not be empty" })
+        }
+        updateUser["productImage"] = productImage;
 
         let updateData = await productModel.findByIdAndUpdate(productId, updateUser, { new: true });
         return res.status(200).send({ status: true, msg: "Product Updated Successfully", data: updateData })
@@ -333,7 +319,7 @@ const deleteproduct = async function (req, res) {
         let productId = req.params.productId;
 
         if (!mongoose.isValidObjectId(productId))
-            res.status(400).send({ status: false, msg: "Please enter a valid productId" })
+        return res.status(400).send({ status: false, msg: "Please enter a valid productId" })
 
 
         let deletedProduct = await productModel.findById({ _id: productId })
