@@ -124,9 +124,9 @@ const getProducts = async function (req, res) {
         let priceLessThan = req.query.priceLessThan
         let priceSort = req.query.priceSort
         let name = req.query.name
-        let availableSizes = data.size;
+        let availableSizes = req.query.size;
         let title = name
-
+        //console.log(availableSizes)
         //Fetching all products
         if (Object.keys(data).length == 0) {
             let allProdtucts = await productModel.find({ isDeleted: false })
@@ -134,42 +134,44 @@ const getProducts = async function (req, res) {
                 return res.status(200).send({ status: true, message: 'Success', data: allProdtucts })
             }
         }
-
         //Fetchin products using filters,
+        if (title) {
+            let filteredProducts = await productModel.find({ isDeleted: false, title: title }).collation({ locale: 'en', strength: 2 })
+            if (filteredProducts) {
+                return res.status(200).send({ status: true, message: 'Success', data: filteredProducts })
+            }
+        }
        
-            
-                let filteredProducts = await productModel.find({ isDeleted: false, title: { $regex: title,$options: 'i' } })
-                if(title){
-                    return res.status(200).send({status:true,message:'Success',data:filteredProducts})
-                }
-                
-            // 
-            
-                console.log(availableSizes)
-    filteredProducts = await productModel.find({ isDeleted: false, availableSizes: { $in: availableSizes} })
+        
+        
+       
 
-        if(availableSizes){
-            return res.status(400).send({status:false,message:'Plz, Provide size amogs S,XS,M,X,L,XXL and XL',data:filteredProducts})
+        if (availableSizes) {
+            filteredProducts = await productModel.find({ isDeleted: false, availableSizes: availableSizes })
+            return res.status(200).send({ status: false, message: 'Succes', data: filteredProducts })
+        }
+        if (priceSort) {
+            if (!priceSort == 1 || !priceSort == -1) {
+                return res.status(400).send({ status: false, message: 'Plz, Provide priceSort as 1 or -1' })
+            }
         }
 
-        // if(!priceSort==1||!priceSort==-1){
-        //     return res.status(400).send({status:false,message:'Plz, Provide priceSort as 1 or -1'})
-        // }
-
-// price range handling
+        // price range handling
         if (priceGreaterThan && priceLessThan) {
-            if(priceGreaterThan===priceLessThan){
-                return res.status(400).send({status:false,message:'Plz, Provide valid price range'})
-            }           
-            //   !(/^\d{0,8}(\.\d{1,2})?$/.test(priceGreaterThan))
-            let productFound = await productModel.find({ $and: [{ isDeleted: false }, { price: { $gt: priceGreaterThan } },
-                { price: { $lt: priceLessThan } }]}).sort({ price: priceSort })
+            if (priceGreaterThan === priceLessThan) {
+                return res.status(400).send({ status: false, message: 'Plz, Provide valid price range' })
+            }
+           
+            let productFound = await productModel.find({
+                $and: [{ isDeleted: false }, { price: { $gt: priceGreaterThan } },
+                { price: { $lt: priceLessThan } }]
+            }).sort({ price: priceSort })
             if (!productFound) {
                 return res.status(400).send({ status: false, message: "No products found" })
             }
             return res.status(200).send({ status: true, message: "Success0", data: productFound })
         }
-        
+
         if (priceGreaterThan) {
             let productFound = await productModel.find({ $and: [{ isDeleted: false }, { price: { $gt: priceGreaterThan } }] }).sort({ price: priceSort })
             console.log(productFound)
@@ -177,7 +179,7 @@ const getProducts = async function (req, res) {
                 return res.status(400).send({ status: false, message: "No available products" })
             }
             return res.status(200).send({ status: true, message: "Success1", data: productFound })
-            
+
         }
         else if (priceLessThan) {
             let productFound = await productModel.find({ $and: [{ isDeleted: false }, { price: { $lt: priceLessThan } }] }).sort({ price: priceSort })
