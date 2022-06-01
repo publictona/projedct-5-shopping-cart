@@ -49,14 +49,7 @@ const createCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Please provide Quantity" })
         }
 
-        //cart from cache
-        // let cartFromCache = await GET_ASYNC(userId)
-        // cartFromCache = JSON.parse(cartFromCache)
-        // if(cartFromCache){
-        //     return res.status(200).send({ status: true, msg: "Cart from cache", data: cartFromCache })
-        //}
 
-        
         //if not in cache then get from db and set in cache
         let cartIdFound = await cartModel.findOne({ userId: userId, isDeleted: false })    //.populate('items.productId')
         if (cartIdFound) {
@@ -172,15 +165,10 @@ const getCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Plz, provide userId" })
         }
 
-//cart from cache
-        let cartFromCache = await GET_ASYNC(userId)
-        if (cartFromCache) {
-            cartFromCache = JSON.parse(cartFromCache)
-            return res.status(200).send({ status: true, msg: "Cart from cache", data: cartFromCache })
-        }
+//ca
         //if not in cache then get from db and set in cache 
         const findCart = await cartModel.findOne({ userId, isDeleted: false }).select({ __v: 0 }).populate('items.productId')
-       await SET_ASYNC(`${userId}`,JSON.stringify(findcart))
+       
         if (findCart) {
             return res.status(200).send({ status: true, msg: "Cart found", data: findCart })
         }
