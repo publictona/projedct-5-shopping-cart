@@ -139,6 +139,14 @@ const updateCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "product is not found" })
         }
 
+        const {removeProduct} = data
+
+        if(!((removeProduct === 0 )|| (removeProduct === 1))){
+            return res.status(400).send({status:false, msg:"Remove Product should be a valid number either 0 or 1"})
+        }
+
+        let findQuantity = findCart.items.find()
+
         let updateCarts = await cartModel.findByIdAndUpdate({ _id: userId, isDeleted: false }, { new: true })
         if (!updateCarts)
             return res.status(404).send({ status: false, message: "cart with this userId does not exist" })
