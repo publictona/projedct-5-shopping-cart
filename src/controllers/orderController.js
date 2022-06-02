@@ -57,6 +57,7 @@ const createOrder = async function (req, res) {
                 return res.status(400).send({ status: false, message: "Status Should be from ['pending', 'completed', 'cancelled']" })
             }
         }
+        //cheking for cart is empty or not
     if(searchCartDetails.items.length==0){
         return res.status(400).send({ status: false, message: "Cart is empty" })
     }
@@ -75,26 +76,31 @@ const createOrder = async function (req, res) {
             cancellable,
             status
 
-         }
-        
-        
-            let createOrder = await orderModel.create(cartData)
-        
-    
-    
-            
-           await cartModel.findOneAndUpdate({_id:cartId, userId:userId},{
+        }
+
+        // let findOrder =await cartModel.findOne({_id:cartId})
+        // if(findOrder.length){
+        //     return res.status(404).send({status:false ,msg:"cart is empty "})
+        // }
+
+
+        let createOrder = await orderModel.create(cartData)
+
+        await cartModel.findOneAndUpdate({_id:cartId, userId:userId},{
             $set:{
                 items:[],
+                
                 totalPrice:0,
                 totalItems:0,
             }
         })
 
+
         return res.status(201).send({ status: true, message: 'Succes', data: createOrder })
 
     }
     catch (error) {
+        console.log(error.message)
         res.status(500).send({ status: false, message: error.message })
 
     }
