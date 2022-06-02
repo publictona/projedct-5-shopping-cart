@@ -25,14 +25,14 @@ router.put('/products/:productId', productController.updateProduct)
 router.delete('/products/:productId', productController.deleteproduct)
 
 //@ FEATURE 3 : CART ROUTE HANDLER
-router.post('/users/:userId/cart',userAuth,cartController.createCart)
-router.put('/users/:userId/cart',cartController.updateCart)
-router.get('/users/:userId/cart',cartController.getCart)
-router.delete('/users/:userId/cart',cartController.deleteCart)
+router.post('/users/:userId/cart', userAuth, cartController.createCart)
+router.put('/users/:userId/cart', userAuth, cartController.updateCart)
+router.get('/users/:userId/cart', userAuth, cartController.getCart)
+router.delete('/users/:userId/cart', userAuth, cartController.deleteCart)
 
 // FEATURE 4 : ORDER ROUTE HANDLER
-router.post('/users/:userId/orders',orderController.createOrder)
-router.put('/users/:userId/orders',orderController.updateOrder)
+router.post('/users/:userId/orders', orderController.createOrder)
+router.put('/users/:userId/orders', orderController.updateOrder)
 
 
 
