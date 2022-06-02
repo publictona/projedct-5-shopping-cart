@@ -288,7 +288,7 @@ const updateUserDetails = async function(req, res) {
   
     if (email) {
   
-        if (!(/^\w+([\.-]?\w+)@\w+([\. -]?\w+)(\.\w{2,3})+$/.test(email.trim()))) return res.status(400).send({ status: false, msg: "Please provide a valid email" });
+        if (/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(email.trim())) return res.status(400).send({ status: false, msg: "Please provide a valid email" });
   
         const isEmailUsed = await userModel.findOne({ email: email })
         if (isEmailUsed) {
@@ -383,7 +383,9 @@ const updateUserDetails = async function(req, res) {
   
     //=========================================update data=============================
   
-    const updatedUser = await userModel.findOneAndUpdate({ _id: userIdFromParams }, updatedData, { new: true })
+   
+    
+     let updatedUser = await userModel.findOneAndUpdate({ _id: userIdFromParams }, updatedData, { new: true })
   
     return res.status(200).send({ status: true, message: "User profile updated", data: updatedUser });
   

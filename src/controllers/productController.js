@@ -203,7 +203,7 @@ const getProductById = async function (req, res) {
         let productId = req.params.productId
 
         if (!mongoose.isValidObjectId(productId))
-            res.status(400).send({ status: false, msg: "Please enter a valid ProductId" })
+            return res.status(400).send({ status: false, msg: "Please enter a valid ProductId" })
 
         let foundProduct = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!foundProduct) {
@@ -227,7 +227,7 @@ const updateProduct = async function (req, res) {
         let bodyData = req.body;
 
         if (!mongoose.isValidObjectId(productId))
-            res.status(400).send({ status: false, msg: "Please enter a valid ProductId" })
+            return res.status(400).send({ status: false, msg: "Please enter a valid ProductId" })
 
 
         if (!validator.isValid(productId)) {
@@ -238,8 +238,12 @@ const updateProduct = async function (req, res) {
         if (Object.keys(bodyData) == 0) {
             return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
         }
-
-
+// check for deleted product
+        let productDeleted = await productModel.findOne({ _id: productId, isDeleted: true })
+        if (productDeleted) {
+            return res.status(400).send({ status: false, msg: "Product is already deleted" })
+        }
+        
         const { title, description, price, isFreeShipping, productImage, style, availableSizes, installments } = bodyData;
 
         let updateUser = {};
@@ -286,21 +290,21 @@ const updateProduct = async function (req, res) {
         }
         updateUser["installments"] = installments;
 
-          
-        let files =req.files
-     if (files && files.length > 0) {
-               let productImage = await aws.uploadFile(files[0]);
-               bodyData.productImage = productImage;
-               let uploadImage= await productModel.findOneAndUpdate({ _id: productId }, bodyData, { new: true })
-               res.status(200).send({ status: true, msg: "Product Updated Successfully", data: uploadImage })
-            }
-            else{
-                let uploadImage= await productModel.findOneAndUpdate({ _id: productId },bodyData, { new: true })
-                res.status(200).send({ status: true, msg: "Product Updated Successfully", data: uploadImage })
-            }
-            updateUser["productImage"] = productImage;
-        
-    
+
+        let files = req.files
+        if (files && files.length > 0) {
+            let productImage = await aws.uploadFile(files[0]);
+            bodyData.productImage = productImage;
+            let uploadImage = await productModel.findOneAndUpdate({ _id: productId }, bodyData, { new: true })
+            res.status(200).send({ status: true, msg: "Product Updated Successfully", data: uploadImage })
+        }
+        else {
+            let uploadImage = await productModel.findOneAndUpdate({ _id: productId }, bodyData, { new: true })
+            res.status(200).send({ status: true, msg: "Product Updated Successfully", data: uploadImage })
+        }
+        updateUser["productImage"] = productImage;
+
+
         // if (productImage == 0) {
         //     return res.status(400).send({ status: false, msg: "productImage should not be empty" })
         // }
@@ -312,7 +316,7 @@ const updateProduct = async function (req, res) {
     }
     catch (error) {
         console.log(error)
-        res.status(500).send({ status: false, msg: "err.message" })
+        res.status(500).send({ status: false, msg:error.message })
     }
 }
 
@@ -325,7 +329,7 @@ const deleteproduct = async function (req, res) {
         let productId = req.params.productId;
 
         if (!mongoose.isValidObjectId(productId))
-        return res.status(400).send({ status: false, msg: "Please enter a valid productId" })
+            return res.status(400).send({ status: false, msg: "Please enter a valid productId" })
 
 
         let deletedProduct = await productModel.findById({ _id: productId })

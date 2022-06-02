@@ -42,22 +42,24 @@ const createCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Please enter a valid productId" })
         }
 
-        // if (!validator.isValid(quantity)) {
-        //     return res.status(400).send({ status: false, msg: "quantity is required" })
-        // }
+        
 
         if (quantity < 1) {
             return res.status(400).send({ status: false, msg: "Please provide Quantity" })
         }
 
+        //check if user exist or not
+        let findUserId = await userModel.findOne({ _id: userId })
+        if (!findUserId) {
+            return res.status(404).send({ status: false, msg: "userId is not found" })
+        }
 
         //if not in cache then get from db and set in cache
         let cartIdFound = await cartModel.findOne({ userId: userId, isDeleted: false })    //.populate('items.productId')
         if (cartIdFound) {
             // await SET_ASYNC( `${userId}` ,JSON.stringify(cartIdFound))
-            return res.status(200).send({ status: true, msg: "Cart already created", data: cartIdFound })
+            return res.status(200).send({ status: true, msg: "Cart already created" })
         }
-
 
 
         let findProduct = await productModel.findById({ _id: productId, isDeleted: false })
@@ -226,10 +228,10 @@ const deleteCart = async function (req, res) {
         }
 
         const deletedCart = await cartModel.findOneAndUpdate({ userId: userId }, { $set: { items: [], totalItems: 0, totalPrice: 0 } }, { new: true })
-        
+
         // await cartModel.findOne({ userId: userId })
-        
-        return res.status(200).send({ status: true, msg: "All Items in cart deleted Successfully", data: deletedCart})
+
+        return res.status(200).send({ status: true, msg: "All Items in cart deleted Successfully", data: deletedCart })
     }
     catch (error) {
         res.status(500).send({ status: false, message: error.message })
