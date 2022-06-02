@@ -74,20 +74,30 @@ const createOrder = async function (req, res) {
             status
 
         }
+
+        // let findOrder =await cartModel.findOne({_id:cartId})
+        // if(findOrder.length){
+        //     return res.status(404).send({status:false ,msg:"cart is empty "})
+        // }
+
+
         let createOrder = await orderModel.create(cartData)
 
         await cartModel.findOneAndUpdate({_id:cartId, userId:userId},{
             $set:{
                 items:[],
+                
                 totalPrice:0,
                 totalItems:0,
             }
         })
 
+
         return res.status(201).send({ status: true, message: 'Succes', data: createOrder })
 
     }
     catch (error) {
+        console.log(error.message)
         res.status(500).send({ status: false, message: error.message })
 
     }
