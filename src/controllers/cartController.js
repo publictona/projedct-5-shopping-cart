@@ -42,7 +42,7 @@ const createCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Please enter a valid productId" })
         }
 
-        
+
 
         if (quantity < 1) {
             return res.status(400).send({ status: false, msg: "Please provide Quantity" })
@@ -100,22 +100,30 @@ const updateCart = async function (req, res) {
     try {
         let userId = req.params.userId
         let data = req.body
+        let userIdFromToken = req.userId
 
-        if (!Object.keys(data).length)
-            return res.status(400).send({ status: false, message: "Please enter some data to update the cart." })
-
+        if (Object.keys(data) == 0) {
+            return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
+        }
         //userId validation
-        if (!mongoose.isValidObjectId(userId))
-            res.status(400).send({ status: false, msg: "Please enter a valid userId" })
+        if (!mongoose.isValidObjectId(userId)) {
+            return res.status(400).send({ status: false, msg: "Please enter a valid userId" })
+        }
 
         if (!validator.isValid(userId)) {
             return res.status(400).send({ status: false, msg: "userId is required" })
         }
 
-        let findUser = await cartModel.findOne({ _id: userId, isDeleted: false })//check
+        let findUser = await userModel.findOne({ _id: userId })
         if (!findUser) {
             return res.status(400).send({ status: false, msg: "User is not found" })
         }
+
+        if (userIdFromToken != userId) {
+            return res.status(403).send({ status: false, message: "You are not authorized" })
+        }
+
+        const { cartId, productId, removeProduct } = data
 
         //cartId validation
         if (!mongoose.isValidObjectId(cartId))
@@ -125,7 +133,7 @@ const updateCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "cartId is required" })
         }
 
-        let findCart = await cartModel.findOne({ _id: cartId, isDeleted: false })
+        let findCart = await cartModel.findOne({ _id: cartId })
         if (!findCart) {
             return res.status(400).send({ status: false, msg: "cart is not found" })
         }
@@ -138,12 +146,10 @@ const updateCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "productId is required" })
         }
 
-        let findProduct = await cartModel.findbyId({ _id: productId, isDeleted: false })//check
+        let findProduct = await productModel.findbyId({ _id: productId })
         if (!findProduct) {
             return res.status(400).send({ status: false, msg: "product is not found" })
         }
-
-        const { removeProduct } = data
 
         if (!((removeProduct === 0) || (removeProduct === 1))) {
             return res.status(400).send({ status: false, msg: "Remove Product should be a valid number either 0 or 1" })
