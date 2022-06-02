@@ -58,11 +58,11 @@ const createOrder = async function (req, res) {
             }
         }
         //cheking for cart is empty or not
-    if(searchCartDetails.items.length==0){
-        return res.status(400).send({ status: false, message: "Cart is empty" })
-    }
+        if (searchCartDetails.items.length == 0) {
+            return res.status(400).send({ status: false, message: "Cart is empty" })
+        }
         const reducer = (previousValue, currentValue) =>
-        previousValue + currentValue
+            previousValue + currentValue
 
         let totalQuantity = searchCartDetails.items.map((x) => x.quantity).reduce(reducer)
 
@@ -86,12 +86,12 @@ const createOrder = async function (req, res) {
 
         let createOrder = await orderModel.create(cartData)
 
-        await cartModel.findOneAndUpdate({_id:cartId, userId:userId},{
-            $set:{
-                items:[],
-                
-                totalPrice:0,
-                totalItems:0,
+        await cartModel.findOneAndUpdate({ _id: cartId, userId: userId }, {
+            $set: {
+                items: [],
+
+                totalPrice: 0,
+                totalItems: 0,
             }
         })
 
@@ -108,31 +108,54 @@ const createOrder = async function (req, res) {
 
 //Update Order
 const updateOrder = async function (req, res) {
+
     try {
-        let orderId = req.params.orderId;
-        console.log(orderId)
-        let data = req.body;
-        if (Object.keys(data).length === 0) {
-            return res.status(400).send({ status: false, message: "Please enter data to update the order" })
-        }
-        if (!mongoose.isValidObjectId(orderId)) {
-            return res.status(400).send({ status: false, message: "Please enter a valid orderId" })
-        }
-        if (!validator.isValid(orderId)) {
-            return res.status(400).send({ status: false, message: "orderId is required" })
+
+        let userId = req.params.userId;
+
+        if (!mongoose.isValidObjectId(userId)) {
+            return res.status(400).send({ status: false, message: "Invalid user id" });
         }
 
-        //updating order
-        let updateOrder = await orderModel.findOneAndUpdate({ orderId, isDeleted: false }, data, { new: true })
-        if (!updateOrder) {
-            return res.status(400).send({ status: false, message: "Order is not found" })
+        let findUserId = await userModel.findById({ _id: userId });
+
+        if (!findUserId) {
+            return res.status(404).send({ status: false, message: "User doesn't exists" });
         }
-        return res.status(201).send({ status: true, message: "Order updated successfully", data: updateOrder })
-    }
-    catch (error) {
-        res.status(500).send({ status: false, message: error.message })
+
+        // // Authentice and Authorized
+        // if (req.userId != userId) {
+        //   return res.status(401).send({ status: false, message: "You're not Authorized" });
+        // }
+
+        let orderId = req.body.orderId;
+
+        if (!mongoose.isValidObjectId(orderId)) {
+            return res.status(400).send({ status: false, message: "Invalid order id" });
+        }
+
+        let findOrderId = await orderModel.findById({ _id: orderId });
+        if (!findOrderId) {
+            return res.status(404).send({ status: false, message: "Order doesn't exists" });
+        }
+
+        if (userId !== findOrderId.userId.toString()) {
+            return res.status(404).send({ status: false, message: "Order's userId didn't match with userId", });
+        }
+
+        if (findOrderId.cancellable == true) {
+
+            let updateStatus = await orderModel.findByIdAndUpdate(orderId, { $set: { status: "complete" } }, { new: true });
+
+            return res.status(200).send({ status: true, message: "Order completed Successfully", data: updateStatus });
+
+        } else {
+            return res.status(400).send({ status: false, message: "Your order isn't cancellable." });
+        }
+
+    } catch (error) {
+        res.status(500).send({ status: false, error: error.message });
     }
 }
-
 
 module.exports = { createOrder, updateOrder }
