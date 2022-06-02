@@ -42,7 +42,7 @@ const createCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Please enter a valid productId" })
         }
 
-        
+
 
         if (quantity < 1) {
             return res.status(400).send({ status: false, msg: "Please provide Quantity" })
@@ -81,7 +81,9 @@ const createCart = async function (req, res) {
                 totalItems: 1
             }
 
-
+            if (data.items.quantity==null) {
+                return res.status(400).send({ status: false, msg: "Please provide Quantity" })
+            }
             await cartModel.create(data)
             let cart = await cartModel.findOne({ userId }).select({ descripton: 0, currencyId: 0, currencyFormat: 0, isFreeShipping: 0 }).populate('items.productId')
             // await SET_ASYNC(`${userId}`   ,userId, JSON.stringify(cart)) 
@@ -112,10 +114,10 @@ const updateCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "userId is required" })
         }
 
-        let findUser = await cartModel.findOne({ _id: userId, isDeleted: false })//check
-        if (!findUser) {
-            return res.status(400).send({ status: false, msg: "User is not found" })
-        }
+        // let findUser = await cartModel.findOne({ _id: userId, isDeleted: false })//check
+        // if (!findUser) {
+        //     return res.status(400).send({ status: false, msg: "User is not found" })
+        // }
 
         //cartId validation
         if (!mongoose.isValidObjectId(cartId))
