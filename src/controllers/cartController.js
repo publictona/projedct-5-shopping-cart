@@ -146,7 +146,7 @@ const updateCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "productId is required" })
         }
 
-        let findProduct = await productModel.findbyId({ _id: productId })
+        let findProduct = await productModel.findById({ _id: productId })
         if (!findProduct) {
             return res.status(400).send({ status: false, msg: "product is not found" })
         }
@@ -155,7 +155,7 @@ const updateCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Remove Product should be a valid number either 0 or 1" })
         }
 
-        let findQuantity = findCart.items.find()
+        //let findQuantity = findCart.items.find()
 
         let updateCarts = await cartModel.findOneAndUpdate({ _id: userId, isDeleted: false }, { new: true })
         if (!updateCarts)
@@ -180,10 +180,10 @@ const getCart = async function (req, res) {
         if (!mongoose.isValidObjectId(userId)) {
             return res.status(400).send({ status: false, msg: "Please enter a valid userId" })
         }
-        const userByUserId = await userModel.findById(userId)
-        if (!userByUserId) {
-            return res.status(404).send({ status: false, message: "User not found" })
-        }
+        // const userByUserId = await userModel.findById(userId)
+        // if (!userByUserId) {
+        //     return res.status(404).send({ status: false, message: "User not found" })
+        // }
 
         if (userIdFromToken != userId) {
             return res.status(403).send({ status: false, message: "You are not authorized" })
@@ -233,7 +233,14 @@ const deleteCart = async function (req, res) {
             return res.status(404).send({ status: false, message: "No Cart Available" })
         }
 
+        
+        if (findCartById.items.length == 0)
+            return res.status(400).send({ status: false, message: `your cart is already empty` });
+
         const deletedCart = await cartModel.findOneAndUpdate({ userId: userId }, { $set: { items: [], totalItems: 0, totalPrice: 0 } }, { new: true })
+        
+
+        
 
         // await cartModel.findOne({ userId: userId })
 

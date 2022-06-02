@@ -238,7 +238,7 @@ const updateUserDetails = async function (req, res) {
     const userIdFromParams = req.params.userId
     const userIdFromToken = req.userId
 
-    const { fname, lname, email, phone, password, address } = data
+    let { fname, lname, email, phone, password, address } = data
 
     const updatedData = {}
 
@@ -282,7 +282,7 @@ const updateUserDetails = async function (req, res) {
 
 
     if (lname) {
-        if (!isValid(lname)) {
+        if (!validator.isValid(lname)) {
             return res.status(400).send({ status: false, Message: "Last name is required" })
         }
 
@@ -348,7 +348,12 @@ const updateUserDetails = async function (req, res) {
 
     //========================================address validation=================================
 
+    
+
+    
     if (address) {
+
+        address = JSON.parse(address)
 
         if (address.shipping) {
 
@@ -392,8 +397,8 @@ const updateUserDetails = async function (req, res) {
 
     //=========================================update data=============================
 
-
-
+     //data.address =address ;
+    
     let updatedUser = await userModel.findOneAndUpdate({ _id: userIdFromParams }, updatedData, { new: true })
 
     return res.status(200).send({ status: true, message: "User profile updated", data: updatedUser });
