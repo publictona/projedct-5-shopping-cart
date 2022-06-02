@@ -41,7 +41,7 @@ const createOrder = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please enter a valid CartId" })
         }
 
-        const searchCartDetails = await cartModel.findOne({ _id: cartId, userId: userId })
+        let searchCartDetails = await cartModel.findOne({ _id: cartId, userId: userId })
         if (!searchCartDetails) {
             return res.status(400).send({ status: false, message: "Cart doesn't belongs to userId" })
         }
@@ -57,7 +57,9 @@ const createOrder = async function (req, res) {
                 return res.status(400).send({ status: false, message: "Status Should be from ['pending', 'completed', 'cancelled']" })
             }
         }
-
+    if(searchCartDetails.items.length==0){
+        return res.status(400).send({ status: false, message: "Cart is empty" })
+    }
         const reducer = (previousValue, currentValue) =>
         previousValue + currentValue
 
@@ -73,10 +75,15 @@ const createOrder = async function (req, res) {
             cancellable,
             status
 
-        }
-        let createOrder = await orderModel.create(cartData)
-
-        await cartModel.findOneAndUpdate({_id:cartId, userId:userId},{
+         }
+        
+        
+            let createOrder = await orderModel.create(cartData)
+        
+    
+    
+            
+           await cartModel.findOneAndUpdate({_id:cartId, userId:userId},{
             $set:{
                 items:[],
                 totalPrice:0,

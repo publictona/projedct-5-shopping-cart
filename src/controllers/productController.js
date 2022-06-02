@@ -289,13 +289,13 @@ const updateProduct = async function (req, res) {
           
         let files =req.files
      if (files && files.length > 0) {
-               let productImage = await uploadFile(files[0]);
+               let productImage = await aws.uploadFile(files[0]);
                bodyData.productImage = productImage;
-               let uploadImage= await productModel.findOneAndUpdate({ _id: productId }, { $set: updateUser }, { new: true })
+               let uploadImage= await productModel.findOneAndUpdate({ _id: productId }, bodyData, { new: true })
                res.status(200).send({ status: true, msg: "Product Updated Successfully", data: uploadImage })
             }
             else{
-                let uploadImage= await productModel.findOneAndUpdate({ _id: productId }, { $set: updateUser }, { new: true })
+                let uploadImage= await productModel.findOneAndUpdate({ _id: productId },bodyData, { new: true })
                 res.status(200).send({ status: true, msg: "Product Updated Successfully", data: uploadImage })
             }
             updateUser["productImage"] = productImage;

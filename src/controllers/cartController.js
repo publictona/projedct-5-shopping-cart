@@ -41,9 +41,9 @@ const createCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Please enter a valid productId" })
         }
 
-        // if (!validator.isValid(quantity)) {
-        //     return res.status(400).send({ status: false, msg: "quantity is required" })
-        // }
+        if (!validator.isValid(quantity)) {
+            return res.status(400).send({ status: false, msg: "quantity is required" })
+        }
 
         if (quantity < 1) {
             return res.status(400).send({ status: false, msg: "Please provide Quantity" })
@@ -77,6 +77,7 @@ const createCart = async function (req, res) {
                 totalPrice: findProduct.price * quantity,
                 totalItems: 1
             }
+            
 
             await cartModel.create(data)
             const cart = await cartModel.findOne({ userId }).select({ descripton: 0, currencyId: 0, currencyFormat: 0, isFreeShipping: 0 }).populate('items.productId')

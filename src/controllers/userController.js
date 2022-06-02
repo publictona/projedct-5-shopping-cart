@@ -215,7 +215,7 @@ const getUser = async function (req, res) {
         }
 
         if (!mongoose.isValidObjectId(userId))
-            res.status(400).send({ status: false, msg: "Please enter a valid userId" })
+           return res.status(400).send({ status: false, msg: "Please enter a valid userId" })
 
         let findUser = await userModel.findById(userId)
         if (!findUser) {
