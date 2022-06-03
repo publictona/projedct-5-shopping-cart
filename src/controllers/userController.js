@@ -214,6 +214,10 @@ const getUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "userId is required to get User data" })
         }
 
+        if (req.userId != userId) {
+            return res.status(401).send({ status: false, message: "You're not Authorized" });
+          }
+          
         if (!mongoose.isValidObjectId(userId))
             return res.status(400).send({ status: false, msg: "Please enter a valid userId" })
 
