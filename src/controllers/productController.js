@@ -150,6 +150,10 @@ const getProducts = async function (req, res) {
             if (!priceSort == 1 || !priceSort == -1) {
                 return res.status(400).send({ status: false, message: 'Plz, Provide priceSort as 1 or -1' })
             }
+            else{
+                let sortedProducts = await productModel.find({ isDeleted: false }).sort({ price: priceSort })
+                return res.status(200).send({ status: true, message: 'Success', data: sortedProducts })
+            }
         }
 
         // price range handling

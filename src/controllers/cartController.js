@@ -12,6 +12,7 @@ const createCart = async function (req, res) {
         let userId = req.params.userId
         let cartId = req.params.cartId
         let data = req.body
+        //let quantity = req.body.quantity
         //let items= JSON.parse(data.items)
 
         if (Object.keys(data) == 0) {
@@ -19,6 +20,10 @@ const createCart = async function (req, res) {
         }
 
         let { productId, quantity } = data
+       // console.log(data.items.quantity)
+        if(!data.quantity){
+            return res.status(400).send({ status: false, msg: "Plz, provide quantity" })
+        }
 
         if (!validator.isValid(userId)) {
             return res.status(400).send({ status: false, msg: "UserId is required" })
@@ -85,9 +90,9 @@ const createCart = async function (req, res) {
                 totalItems: 1
             }
 
-
+           
             await cartModel.create(data)
-            let cart = await cartModel.findOne({ userId }).select({ descripton: 0, currencyId: 0, currencyFormat: 0, isFreeShipping: 0 }).populate('items.productId')
+            let cart = await cartModel.findOne({ userId }).select({ descripton: 0, currencyId: 0, currencyFormat: 0, isFreeShipping: 0 })
             // await SET_ASYNC(`${userId}`   ,userId, JSON.stringify(cart)) 
             return res.status(201).send({ status: true, msg: "Cart Created Successfully", data: cart })
 
@@ -159,7 +164,7 @@ const updateCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Remove Product should be a valid number either 0 or 1" })
         }
 
-        //let findQuantity = findCart.items.find()
+        
 
         let updateCarts = await cartModel.findOneAndUpdate({ _id: userId, isDeleted: false }, { new: true })
         if (!updateCarts)

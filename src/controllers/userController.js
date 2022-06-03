@@ -223,7 +223,7 @@ const getUser = async function (req, res) {
 
         let findUser = await userModel.findById(userId)
         if (!findUser) {
-            return res.status(404).send({ status: false, message: "User not found" })
+            return res.status(200).send({ status: false, message: "User not found" })
         }
         res.status(200).send({ status: true, msg: "User profile details", data: findUser })
 
