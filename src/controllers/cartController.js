@@ -3,7 +3,6 @@ const productModel = require("../models/productModel")
 const cartModel = require("../models/cartModel")
 const validator = require("../validator/validator")
 const mongoose = require('mongoose')
-const { createIndexes } = require("../models/userModel")
 
 
 
@@ -34,6 +33,10 @@ const createCart = async function (req, res) {
             return res.status(404).send({ status: false, msg: "userId is not found" })
         }
 
+        if (req.userId != userId) {
+            return res.status(401).send({ status: false, message: "You're not Authorized" });
+          }
+
         if (!validator.isValid(productId)) {
             return res.status(400).send({ status: false, msg: "ProductId is required" })
         }
@@ -41,6 +44,7 @@ const createCart = async function (req, res) {
         if (!mongoose.isValidObjectId(productId)) {
             return res.status(400).send({ status: false, msg: "Please enter a valid productId" })
         }
+
 
 
 
