@@ -134,9 +134,9 @@ const getProducts = async function (req, res) {
                 return res.status(200).send({ status: true, message: 'Success', data: allProdtucts })
             }
         }
-        //Fetchin products using filters,
+        //Fetching products using filters,
         if (title) {
-            let filteredProducts = await productModel.find({ isDeleted: false, title: title }).collation({ locale: 'en', strength: 2 })
+            let filteredProducts = await productModel.find({ isDeleted: false, title: title }).collation({ local: 'en', strength: 2 })
             if (filteredProducts.length === 0) {
                 return res.status(404).send({ status: false, message: 'No Products Found' })
             }
@@ -149,6 +149,10 @@ const getProducts = async function (req, res) {
         if (priceSort) {
             if (!priceSort == 1 || !priceSort == -1) {
                 return res.status(400).send({ status: false, message: 'Plz, Provide priceSort as 1 or -1' })
+            }
+            else{
+                let sortedProducts = await productModel.find({ isDeleted: false }).sort({ price: priceSort })
+                return res.status(200).send({ status: true, message: 'Success', data: sortedProducts })
             }
         }
 

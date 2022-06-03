@@ -21,9 +21,9 @@ const createOrder = async function (req, res) {
             return res.status(400).send({ status: false, message: 'userId is required' })
         }
 
-        // if (req.userId != userId) {
-        //     return res.status(401).send({ status: false, message: "You are not Authorized" })
-        // }
+        if (req.userId != userId) {
+            return res.status(401).send({ status: false, message: "You are not Authorized" })
+        }
 
         //check for user exist or not
         let userExist = await userModel.findOne({ userId, isDeleted: false })
@@ -123,10 +123,10 @@ const updateOrder = async function (req, res) {
             return res.status(404).send({ status: false, message: "User doesn't exists" });
         }
 
-        // // Authentice and Authorized
-        // if (req.userId != userId) {
-        //   return res.status(401).send({ status: false, message: "You're not Authorized" });
-        // }
+        // Authentice and Authorized
+        if (req.userId != userId) {
+          return res.status(401).send({ status: false, message: "You're not Authorized" });
+        }
 
         let orderId = req.body.orderId;
 
@@ -157,5 +157,7 @@ const updateOrder = async function (req, res) {
         res.status(500).send({ status: false, error: error.message });
     }
 }
+
+//============================================EXPORTING===================================================================================
 
 module.exports = { createOrder, updateOrder }

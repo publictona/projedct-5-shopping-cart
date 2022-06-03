@@ -8,8 +8,6 @@ const orderController = require('../controllers/orderController')
 const { userAuth } = require('../middleware/auth')
 
 
-
-
 //@ FEATURE 1 : USER ROUTE HANDLER
 router.post('/register', userController.createUser)
 router.post('/login', userController.loginUser)
@@ -37,5 +35,6 @@ router.put('/users/:userId/orders',userAuth, orderController.updateOrder)
 
 
 
+//==================================================================================================================================//
 
 module.exports = router
