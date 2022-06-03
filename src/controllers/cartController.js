@@ -9,101 +9,114 @@ const mongoose = require('mongoose')
 
 const createCart = async function (req, res) {
     try {
-        let userId = req.params.userId
-        let cartId = req.params.cartId
-        let data = req.body
-        //let quantity = req.body.quantity
-        //let items= JSON.parse(data.items)
+        const _id = req.params.userId
+        const data = req.body
+        let { cartId, productId, quantity } = data
 
-        if (Object.keys(data) == 0) {
-            return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
-        }
-
-        let { productId, quantity } = data
-       // console.log(data.items.quantity)
-        if(!data.quantity){
-            return res.status(400).send({ status: false, msg: "Plz, provide quantity" })
-        }
-
-        if (!validator.isValid(userId)) {
-            return res.status(400).send({ status: false, msg: "UserId is required" })
-        }
-
-        if (!mongoose.isValidObjectId(userId)) {
-            return res.status(400).send({ status: false, msg: "Please enter a valid userId" })
-        }
-
-        let findUser = await userModel.findOne({ userId })
-        if (!findUser) {
-            return res.status(404).send({ status: false, msg: "userId is not found" })
-        }
-
-        if (req.userId != userId) {
-            return res.status(401).send({ status: false, message: "You're not Authorized" });
-          }
-
-        if (!validator.isValid(productId)) {
-            return res.status(400).send({ status: false, msg: "ProductId is required" })
+        if (!productId) {
+            return res.status(400).send({ status: false, message: "Provide productId" })
         }
 
         if (!mongoose.isValidObjectId(productId)) {
-            return res.status(400).send({ status: false, msg: "Please enter a valid productId" })
+            return res.status(400).send({ status: false, message: "Invalid productId" })
         }
 
-
-
-
-        if (quantity < 1) {
-            return res.status(400).send({ status: false, msg: "Please provide Quantity" })
+        if (!quantity) {
+            quantity = 1
         }
 
-        //check if user exist or not
-        let findUserId = await userModel.findOne({ _id: userId })
-        if (!findUserId) {
-            return res.status(404).send({ status: false, msg: "userId is not found" })
+        if (!/^[0-9]+$/.test(quantity)) {
+            return res.status(400).send({ status: false, message: "Quantity should be a valid number" })
         }
 
-        //if not in cache then get from db and set in cache
-        let cartIdFound = await cartModel.findOne({ userId: userId, isDeleted: false })    //.populate('items.productId')
-        if (cartIdFound) {
-            // await SET_ASYNC( `${userId}` ,JSON.stringify(cartIdFound))
-            return res.status(200).send({ status: true, msg: "Cart already created" })
-        }
-
-
-        let findProduct = await productModel.findById({ _id: productId, isDeleted: false })
+        const findProduct = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!findProduct) {
-            return res.status(404).send({ status: false, msg: "productId is not found" })
+            return res.status(404).send({ status: false, message: "product does not exists" })
         }
 
-        let findCart = await cartModel.findOne({ _id: userId })        //.populate('items.productId')
-        // console.log(findCart)
-        if (!findCart) {
+        if (!cartId) {
+            const findCart = await cartModel.findOne({ userId: _id })
 
-            let data = {
-                userId: userId,
-                items: [{
-                    productId: productId,
-                    quantity: quantity
-                }],
-                totalPrice: findProduct.price * quantity,
-                totalItems: 1
+            if (findCart) {
+                //doubt
+                return res.status(400).send({ status: false, message: "cart is already created" })
             }
 
-           
-            await cartModel.create(data)
-            let cart = await cartModel.findOne({ userId }).select({ descripton: 0, currencyId: 0, currencyFormat: 0, isFreeShipping: 0 })
-            // await SET_ASYNC(`${userId}`   ,userId, JSON.stringify(cart)) 
-            return res.status(201).send({ status: true, msg: "Cart Created Successfully", data: cart })
+            if (!findCart) {
+                const addToCart = {
+                    userId: _id,
+                    items: {
+                        productId: productId,
+                        quantity: quantity
+                    },
+                    totalPrice: findProduct.price * quantity,
+                    totalItems: 1
+                }
 
+                const cart = await cartModel.create(addToCart)
+                return res.status(201).send({ status: true, message: "cart created and product added to cart successfully", data: cart })
+            }
         }
-    }
-    catch (error) {
-        console.log(error)
-        res.status(500).send({ status: false, message: error.message })
 
+
+        if (cartId) {
+            if (!mongoose.isValidObjectId(cartId)) {
+                return res.status(400).send({ status: false, message: "Invalid cartId" })
+            }
+
+            const findRealCart = await cartModel.findOne({ userId: _id })
+            if (findRealCart) {
+                if (findRealCart._id != cartId) {
+                    return res.status(400).send({ status: false, message: `Incorrect CartId  ` })
+                }
+            }
+
+            const findCart = await cartModel.findOne({ _id: cartId })
+            if (!findCart) {
+                const addToCart = {
+                    userId: _id,
+                    items: {
+                        productId: productId,
+                        quantity: quantity
+                    },
+                    totalPrice: findProduct.price * quantity,
+                    totalItems: 1
+                }
+
+                const cart = await cartModel.create(addToCart)
+
+                return res.status(201).send({ status: true, message: "cart created and product added to cart successfully", data: cart })
+            }
+
+            if (findCart) {
+
+                
+                for (let i = 0; i < findCart.items.length; i++) {
+
+                    if (`${findCart.items[i].productId}` == `${findProduct._id}`) {
+                        findCart.items[i].quantity = findCart.items[i].quantity + quantity
+                        findCart.totalPrice = (findProduct.price * quantity) + findCart.totalPrice
+                        findCart.totalItems = findCart.items.length
+                        findCart.save()
+                        return res.status(200).send({ status: true, message: "product added to cart", data: findCart })
+                    }
+                }
+
+               
+                findCart.items[(findCart.items.length)] = { productId: productId, quantity: quantity }
+                findCart.totalPrice = (findProduct.price * quantity) + findCart.totalPrice
+                findCart.totalItems = findCart.items.length
+                findCart.save()
+                return res.status(200).send({ status: true, message: "product added to cart", data: findCart })
+            }
+        }
+
+    }
+     catch (error) {
+        res.status(500).send({ status: false, message: error.message, });
     }
 }
+
 //===============================================Update Cart API========================================================
 const updateCart = async function (req, res) {
     try {
