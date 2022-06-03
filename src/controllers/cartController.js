@@ -162,7 +162,7 @@ const updateCart = async function (req, res) {
             return res.status(404).send({ status: false, message: "cart with this userId does not exist" })
 
         await cartModel.findOneAndUpdate({ _id: productId }, { removeProduct: findProduct.removeProduct - 1 }, { new: true })
-        res.status(20).send({ status: false, message: "product removed from cart successfully", data: updateCarts })
+        res.status(200).send({ status: false, message: "product removed from cart successfully", data: updateCarts })
 
 
     } catch (error) {
