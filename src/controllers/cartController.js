@@ -224,9 +224,9 @@ const deleteCart = async function (req, res) {
             return res.status(404).send({ status: false, msg: "User does not exist" })
         }
 
-        // if (req.userId != userId) {
-        //     return res.status(401).send({ status: false, message: "You're not Authorized" })
-        // }
+        if (req.userId != userId) {
+            return res.status(401).send({ status: false, message: "You're not Authorized" })
+        }
 
         const findCartById = await cartModel.findOne({ userId: userId })
         if (!findCartById) {
@@ -244,7 +244,7 @@ const deleteCart = async function (req, res) {
 
         // await cartModel.findOne({ userId: userId })
 
-        return res.status(200).send({ status: true, msg: "All Items in cart deleted Successfully", data: deletedCart })
+        return res.status(204).send({ status: true, msg: "All Items in cart deleted Successfully", data: deletedCart })
     }
     catch (error) {
         res.status(500).send({ status: false, message: error.message })
