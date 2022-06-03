@@ -134,9 +134,9 @@ const getProducts = async function (req, res) {
                 return res.status(200).send({ status: true, message: 'Success', data: allProdtucts })
             }
         }
-        //Fetchin products using filters,
+        //Fetching products using filters,
         if (title) {
-            let filteredProducts = await productModel.find({ isDeleted: false, title: title }).collation({ locale: 'en', strength: 2 })
+            let filteredProducts = await productModel.find({ isDeleted: false, title: title }).collation({ local: 'en', strength: 2 })
             if (filteredProducts.length === 0) {
                 return res.status(404).send({ status: false, message: 'No Products Found' })
             }
