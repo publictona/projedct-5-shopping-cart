@@ -160,7 +160,7 @@ const updateCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Remove Product should be a valid number either 0 or 1" })
         }
 
-        //let findQuantity = findCart.items.find()
+        
 
         let updateCarts = await cartModel.findOneAndUpdate({ _id: userId, isDeleted: false }, { new: true })
         if (!updateCarts)

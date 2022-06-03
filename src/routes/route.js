@@ -31,8 +31,8 @@ router.get('/users/:userId/cart', userAuth, cartController.getCart)
 router.delete('/users/:userId/cart', userAuth, cartController.deleteCart)
 
 // FEATURE 4 : ORDER ROUTE HANDLER
-router.post('/users/:userId/orders', orderController.createOrder)
-router.put('/users/:userId/orders', orderController.updateOrder)
+router.post('/users/:userId/orders',userAuth, orderController.createOrder)
+router.put('/users/:userId/orders',userAuth, orderController.updateOrder)
 
 
 
