@@ -1,7 +1,6 @@
 const userModel = require('../models/userModel');
 const cartModel = require("../models/cartModel")
 const orderModel = require('../models/orderModel');
-
 const validator = require("../validator/validator");
 const mongoose = require('mongoose');
 

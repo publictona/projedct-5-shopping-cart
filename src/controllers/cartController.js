@@ -189,7 +189,8 @@ const getCart = async function (req, res) {
         // if (!userByUserId) {
         //     return res.status(404).send({ status: false, message: "User not found" })
         // }
-
+        
+//authorization
         if (userIdFromToken != userId) {
             return res.status(403).send({ status: false, message: "You are not authorized" })
         }
@@ -244,9 +245,6 @@ const deleteCart = async function (req, res) {
 
         const deletedCart = await cartModel.findOneAndUpdate({ userId: userId }, { $set: { items: [], totalItems: 0, totalPrice: 0 } }, { new: true })
         
-
-        
-
         // await cartModel.findOne({ userId: userId })
 
         return res.status(204).send({ status: true, msg: "All Items in cart deleted Successfully", data: deletedCart })
@@ -255,5 +253,7 @@ const deleteCart = async function (req, res) {
         res.status(500).send({ status: false, message: error.message })
     }
 }
+
+//=====================================================EXPORTING==========================================================================
 
 module.exports = { createCart, updateCart, getCart, deleteCart }

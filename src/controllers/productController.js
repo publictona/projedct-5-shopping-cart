@@ -51,12 +51,12 @@ const createProduct = async function (req, res) {
         if (!validator.isValid(currencyId)) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide currencyId ' })
         }
-        if(data.installments){
-            if(!(!isNaN(Number(installments)))){
+        if (data.installments) {
+            if (!(!isNaN(Number(installments)))) {
                 return res.status(400).send({ status: false, msg: "Plz, enter valid format of installmentsit should be a number" })
             }
         }
-    
+
 
         if (currencyId != "INR") {
             return res.status(400).send({ status: false, mgs: 'CurrencyId Should be in INR ' })
@@ -82,15 +82,6 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide availableSizes ' })
         }
         //Selection of size
-
-        //data.availableSizes=JSON.parse(availableSizes)
-        //console.log(data.availableSizes)
-        //     let Sizes = ["S", "XS", "M","L", "X","XL", "XXL" ]
-        // for (let i = 0; i < availableSizes.length; i++) {
-        //   if (!Sizes.includes(availableSizes[i])) {
-        //     return res.status(400).send({status: false,message: " size must among S, XS,M,X, L,XXL and XL"})
-        //   }
-        //  }
         let sizeArray = availableSizes.split(",").map(x => x.trim())
         for (let i = 0; i < sizeArray.length; i++) {
             if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizeArray[i]))) {
@@ -132,7 +123,7 @@ const getProducts = async function (req, res) {
         let name = req.query.name
         let availableSizes = req.query.size;
         let title = name
-        //console.log(availableSizes)
+
         //Fetching all products
         if (Object.keys(data).length == 0) {
             let allProdtucts = await productModel.find({ isDeleted: false })
@@ -156,9 +147,9 @@ const getProducts = async function (req, res) {
             if (!priceSort == 1 || !priceSort == -1) {
                 return res.status(400).send({ status: false, message: 'Plz, Provide priceSort as 1 or -1' })
             }
-               let sortedProducts = await productModel.find({ isDeleted: false }).sort({ price: priceSort })
-                return res.status(200).send({ status: true, message: 'Success', data: sortedProducts })
-        
+            let sortedProducts = await productModel.find({ isDeleted: false }).sort({ price: priceSort })
+            return res.status(200).send({ status: true, message: 'Success', data: sortedProducts })
+
         }
 
         // price range handling
@@ -173,7 +164,6 @@ const getProducts = async function (req, res) {
             }).sort({ price: priceSort })
             if (productFound.length === 0) {
                 return res.status(400).send({ status: false, message: "No products found" })
-
             }
             return res.status(200).send({ status: true, message: "Success", data: productFound })
 
@@ -186,7 +176,6 @@ const getProducts = async function (req, res) {
                 return res.status(400).send({ status: false, message: "No available products" })
             }
             return res.status(200).send({ status: true, message: "Success", data: productFound })
-
 
         }
         else if (priceLessThan) {
@@ -203,7 +192,6 @@ const getProducts = async function (req, res) {
     }
 
 }
-
 
 //======================================== < Get Product By Params > =================================
 
@@ -226,7 +214,6 @@ const getProductById = async function (req, res) {
 
     }
 }
-
 //========================================== < Update Product >=======================================
 
 const updateProduct = async function (req, res) {
@@ -243,16 +230,15 @@ const updateProduct = async function (req, res) {
             return res.status(400).send({ status: false, msg: "userId is required for update data" })
         }
 
-
         if (Object.keys(bodyData) == 0) {
             return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
         }
-// check for deleted product
+        // check for deleted product
         let productDeleted = await productModel.findOne({ _id: productId, isDeleted: true })
         if (productDeleted) {
             return res.status(400).send({ status: false, message: "Product is already deleted" })
         }
-        
+
         const { title, description, price, isFreeShipping, productImage, style, availableSizes, installments } = bodyData;
 
         let updateUser = {};
@@ -313,22 +299,12 @@ const updateProduct = async function (req, res) {
         }
         updateUser["productImage"] = productImage;
 
-
-        // if (productImage == 0) {
-        //     return res.status(400).send({ status: false, msg: "productImage should not be empty" })
-        // }
-        // updateUser["productImage"] = productImage;
-
-        // let updateData = await productModel.findByIdAndUpdate(productId, updateUser, { new: true });
-        // return res.status(200).send({ status: true, msg: "Product Updated Successfully", data: updateData })
-
     }
     catch (error) {
         console.log(error)
-        res.status(500).send({ status: false, msg:error.message })
+        res.status(500).send({ status: false, msg: error.message })
     }
 }
-
 
 //==================================== < Delete Product >======================================
 

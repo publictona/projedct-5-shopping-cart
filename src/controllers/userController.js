@@ -68,7 +68,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Please Provide a Valid Phone Number" })
         }
 
-        let uniquePhone = await userModel.findOne({phone: phone })
+        let uniquePhone = await userModel.findOne({ phone: phone })
         if (uniquePhone) {
             return res.status(400).send({ status: false, msg: "Phone Number Already Exist" })
         }
@@ -379,8 +379,11 @@ const updateUserDetails = async function (req, res) {
 
             updatedData["address.shipping.pincode"] = address.shipping.pincode
 
+            if (!(/^[1-9][0-9]{5}$/.test(address.shipping.pincode))) {
+                return res.status(400).send({ status: false, msg: "Enter Valid Pincode for Shipping Address" })
+            }
         }
-
+        
         if (address.billing) {
             if (!validator.isValid(address.billing.street)) {
                 return res.status(400).send({ status: false, Message: "Please provide street name in billing address" })
@@ -399,7 +402,7 @@ const updateUserDetails = async function (req, res) {
         }
     }
 
-    //=========================================update data=============================
+    //=========================================update data==========================================================
 
     //data.address =address ;
 
@@ -409,8 +412,6 @@ const updateUserDetails = async function (req, res) {
 
 }
 
-
-
-
+//==============================================EXPORTING==========================================================================
 
 module.exports = { createUser, loginUser, getUser, updateUserDetails }
