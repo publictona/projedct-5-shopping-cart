@@ -1,6 +1,5 @@
  const mongoose = require('mongoose');
 const productModel = require('./productModel');
-
 const ObjectId=mongoose.Types.ObjectId;
 
 const productSchema = new mongoose.Schema({

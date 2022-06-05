@@ -4,7 +4,7 @@ const orderModel = require('../models/orderModel');
 const validator = require("../validator/validator");
 const mongoose = require('mongoose');
 
-
+//======================================================< create order >==========================================================
 const createOrder = async function (req, res) {
     try {
         let data = req.body;
@@ -99,7 +99,7 @@ const createOrder = async function (req, res) {
     }
 }
 
-//Update Order
+//===========================================< Update Order >==============================================================
 const updateOrder = async function (req, res) {
 
     try {
@@ -116,7 +116,7 @@ const updateOrder = async function (req, res) {
             return res.status(404).send({ status: false, message: "User doesn't exists" });
         }
 
-        // Authentice and Authorized
+        // authorization
         if (req.userId != userId) {
           return res.status(401).send({ status: false, message: "You're not Authorized" });
         }
@@ -153,4 +153,4 @@ const updateOrder = async function (req, res) {
 
 //============================================EXPORTING===================================================================================
 
-module.exports = { createOrder, updateOrder }
+  module.exports = { createOrder, updateOrder }

@@ -213,7 +213,7 @@ const getUser = async function (req, res) {
         if (!validator.isValid(userId)) {
             return res.status(400).send({ status: false, msg: "userId is required to get User data" })
         }
-
+//authorization
         if (req.userId != userId) {
             return res.status(401).send({ status: false, message: "You're not Authorized" });
         }
@@ -255,7 +255,7 @@ const updateUserDetails = async function (req, res) {
     if (!userByuserId) {
         return res.status(404).send({ status: false, message: 'user not found.' });
     }
-
+//authorization
     if (userIdFromToken != userIdFromParams) {
         return res.status(403).send({ status: false, message: "Unauthorized access." });
     }

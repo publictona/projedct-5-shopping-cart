@@ -227,7 +227,7 @@ const updateProduct = async function (req, res) {
 
 
         if (!validator.isValid(productId)) {
-            return res.status(400).send({ status: false, msg: "userId is required for update data" })
+            return res.status(400).send({ status: false, msg: "productId is required for update data" })
         }
 
         if (Object.keys(bodyData) == 0) {

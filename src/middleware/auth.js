@@ -25,9 +25,4 @@ const userAuth= async function (req, res, next) {
 }
 
 
-
-
-
-
-
 module.exports = { userAuth }
