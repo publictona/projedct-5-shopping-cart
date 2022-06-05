@@ -12,8 +12,8 @@ const mongoose = require('mongoose')
 const createUser = async function (req, res) {
     try {
         let data = req.body
-        if (Object.keys(data) == 0) {
-            return res.status(400).send({ status: false, msg: "Bad Request, No Data Provided" })
+        if (Object.keys(data).length == 0) {
+            return res.status(400).send({ status: false, msg: " No Data Provided" })
         }
 
         // Profile Image Creation :-
@@ -68,7 +68,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Please Provide a Valid Phone Number" })
         }
 
-        let uniquePhone = await userModel.findOne({ phone })
+        let uniquePhone = await userModel.findOne({phone: phone })
         if (uniquePhone) {
             return res.status(400).send({ status: false, msg: "Phone Number Already Exist" })
         }
@@ -216,8 +216,8 @@ const getUser = async function (req, res) {
 
         if (req.userId != userId) {
             return res.status(401).send({ status: false, message: "You're not Authorized" });
-          }
-          
+        }
+
         if (!mongoose.isValidObjectId(userId))
             return res.status(400).send({ status: false, msg: "Please enter a valid userId" })
 
@@ -225,7 +225,7 @@ const getUser = async function (req, res) {
         if (!findUser) {
             return res.status(200).send({ status: false, message: "User not found" })
         }
-        res.status(200).send({ status: true, msg: "User profile details", data: findUser })
+        return res.status(200).send({ status: true, message: "User profile details", data: findUser })
 
     }
     catch (err) {
@@ -352,9 +352,9 @@ const updateUserDetails = async function (req, res) {
 
     //========================================address validation=================================
 
-    
 
-    
+
+
     if (address) {
 
         address = JSON.parse(address)
@@ -401,8 +401,8 @@ const updateUserDetails = async function (req, res) {
 
     //=========================================update data=============================
 
-     //data.address =address ;
-    
+    //data.address =address ;
+
     let updatedUser = await userModel.findOneAndUpdate({ _id: userIdFromParams }, updatedData, { new: true })
 
     return res.status(200).send({ status: true, message: "User profile updated", data: updatedUser });

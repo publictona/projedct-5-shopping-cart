@@ -51,6 +51,12 @@ const createProduct = async function (req, res) {
         if (!validator.isValid(currencyId)) {
             return res.status(400).send({ status: false, mgs: 'Plz,Provide currencyId ' })
         }
+        if(data.installments){
+            if(!(!isNaN(Number(installments)))){
+                return res.status(400).send({ status: false, msg: "Plz, enter valid format of installmentsit should be a number" })
+            }
+        }
+    
 
         if (currencyId != "INR") {
             return res.status(400).send({ status: false, mgs: 'CurrencyId Should be in INR ' })
@@ -107,7 +113,7 @@ const createProduct = async function (req, res) {
         }
 
         let savedPoduct = await productModel.create(productData);
-        res.status(201).send({ status: true, msg: 'Product Created Successfully', data: savedPoduct })
+        res.status(201).send({ status: true, message: 'Success', data: savedPoduct })
 
     } catch (error) {
         res.status(500).send({ status: false, message: error.message })
@@ -136,7 +142,7 @@ const getProducts = async function (req, res) {
         }
         //Fetching products using filters,
         if (title) {
-            let filteredProducts = await productModel.find({ isDeleted: false, title: title }).collation({ local: 'en', strength: 2 })
+            let filteredProducts = await productModel.find({ isDeleted: false, title: title })
             if (filteredProducts.length === 0) {
                 return res.status(404).send({ status: false, message: 'No Products Found' })
             }
@@ -144,7 +150,7 @@ const getProducts = async function (req, res) {
         }
         if (availableSizes) {
             filteredProducts = await productModel.find({ isDeleted: false, availableSizes: availableSizes })
-            return res.status(200).send({ status: false, message: 'Succes', data: filteredProducts })
+            return res.status(200).send({ status: false, message: 'Success', data: filteredProducts })
         }
         if (priceSort) {
             if (!priceSort == 1 || !priceSort == -1) {
@@ -212,7 +218,7 @@ const getProductById = async function (req, res) {
         if (!foundProduct) {
             return res.status(400).send({ status: false, msg: 'No product found' })
         }
-        return res.status(200).send({ status: true, msg: 'Sucess', data: foundProduct })
+        return res.status(200).send({ status: true, message: 'Success', data: foundProduct })
 
     }
     catch (error) {
@@ -244,7 +250,7 @@ const updateProduct = async function (req, res) {
 // check for deleted product
         let productDeleted = await productModel.findOne({ _id: productId, isDeleted: true })
         if (productDeleted) {
-            return res.status(400).send({ status: false, msg: "Product is already deleted" })
+            return res.status(400).send({ status: false, message: "Product is already deleted" })
         }
         
         const { title, description, price, isFreeShipping, productImage, style, availableSizes, installments } = bodyData;
@@ -303,7 +309,7 @@ const updateProduct = async function (req, res) {
         }
         else {
             let uploadImage = await productModel.findOneAndUpdate({ _id: productId }, bodyData, { new: true })
-            res.status(200).send({ status: true, msg: "Product Updated Successfully", data: uploadImage })
+            res.status(200).send({ status: true, message: "Product Updated Successfully", data: uploadImage })
         }
         updateUser["productImage"] = productImage;
 

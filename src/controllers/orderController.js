@@ -61,11 +61,11 @@ const createOrder = async function (req, res) {
         if (searchCartDetails.items.length == 0) {
             return res.status(400).send({ status: false, message: "Cart is empty" })
         }
+        
         const reducer = (previousValue, currentValue) =>
             previousValue + currentValue
-
         let totalQuantity = searchCartDetails.items.map((x) => x.quantity).reduce(reducer)
-
+ 
         //create order
         let cartData = {
             userId: userId,
@@ -77,12 +77,6 @@ const createOrder = async function (req, res) {
             status
 
         }
-
-        // let findOrder =await cartModel.findOne({_id:cartId})
-        // if(findOrder.length){
-        //     return res.status(404).send({status:false ,msg:"cart is empty "})
-        // }
-
 
         let createOrder = await orderModel.create(cartData)
 
@@ -96,7 +90,7 @@ const createOrder = async function (req, res) {
         })
 
 
-        return res.status(201).send({ status: true, message: 'Succes', data: createOrder })
+        return res.status(201).send({ status: true, message: 'Success', data: createOrder })
 
     }
     catch (error) {
@@ -147,7 +141,7 @@ const updateOrder = async function (req, res) {
 
             let updateStatus = await orderModel.findByIdAndUpdate(orderId, { $set: { status: "complete" } }, { new: true });
 
-            return res.status(200).send({ status: true, message: "Order completed Successfully", data: updateStatus });
+            return res.status(200).send({ status: true, message: "complete", data: updateStatus });
 
         } else {
             return res.status(400).send({ status: false, message: "Your order isn't cancellable." });
